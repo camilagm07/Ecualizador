@@ -41,22 +41,22 @@
 #define REAL 0
 #define IMAG 1
 
-void fft(double ent[1324][2], double sal[1324][2]){
-    fftw_plan planfft = fftw_plan_dft_1d(1324, ent, sal, FFTW_FORWARD, FFTW_ESTIMATE);
+void fft(double ent[2048][2], double sal[2048][2]){
+    fftw_plan planfft = fftw_plan_dft_1d(2048, ent, sal, FFTW_FORWARD, FFTW_ESTIMATE);
     fftw_execute(planfft);
     fftw_destroy_plan(planfft);
     fftw_cleanup();
 }
 
-void idft(double ent[1324][2], double sal[1324][2]){
-    fftw_plan planidft = fftw_plan_dft_1d(1324, ent ,sal, FFTW_BACKWARD, FFTW_ESTIMATE);
+void idft(double ent[2048][2], double sal[2048][2]){
+    fftw_plan planidft = fftw_plan_dft_1d(2048, ent ,sal, FFTW_BACKWARD, FFTW_ESTIMATE);
     fftw_execute(planidft);
     fftw_destroy_plan(planidft);
     fftw_cleanup();
 
-    for (int i=0; i<1324; i++){ //Normalización
-        sal[i][REAL] /= 1324;
-        sal[i][IMAG] /= 1324;
+    for (int i=0; i<2048; i++){ //Normalización
+        sal[i][REAL] /= 2048;
+        sal[i][IMAG] /= 2048;
     }
 
 }
@@ -70,9 +70,9 @@ void hn(double K,double a1,double a2,double a3,double a4,double a5,double a6,dou
     b4 = K*b4;
     b5 = K*b5;
     b6 = K*b6;
-    float y_menos_1=0, y_menos_2=0, y_menos_3=0, y_menos_4=0, y_menos_5=0, y_menos_6=0; //Init Condiciones iniciales
+    float y_1=0, y_2=0, y_3=0, y_4=0, y_5=0, y_6=0; //Init Condiciones iniciales
 
-    for(int i=0; i<1324; i++){
+    for(int i=0; i<2048; i++){
         H[i][IMAG] = 0;
         if(i<300){
             switch(i){
@@ -80,33 +80,33 @@ void hn(double K,double a1,double a2,double a3,double a4,double a5,double a6,dou
                 H[i][REAL]= K;
                 break;
             case 1:
-                H[i][REAL]= b1 - a1*y_menos_1; //Caso n=1. Solo entrada retrada con k=1 y salidas enteriores corrrespondietes
+                H[i][REAL]= b1 - a1*y_1; //Caso n=1. Solo entrada retrada con k=1 y salidas enteriores corrrespondietes
                 break;
             case 2:
-                H[i][REAL]= b2 - a1*y_menos_1 - a2*y_menos_2; //Caso n=2, x(n-k) k=2, salidas correspondientes
+                H[i][REAL]= b2 - a1*y_1 - a2*y_2; //Caso n=2, x(n-k) k=2, salidas correspondientes
                 break;
             case 3:
-                H[i][REAL]= b3 - a1*y_menos_1 - a2*y_menos_2 - a3*y_menos_3; //Caso n=3, k=3.
+                H[i][REAL]= b3 - a1*y_1 - a2*y_2 - a3*y_3; //Caso n=3, k=3.
                 break;
             case 4:
-                H[i][REAL]= b4 - a1*y_menos_1 - a2*y_menos_2 - a3*y_menos_3 - a4*y_menos_4; //n = k = 4
+                H[i][REAL]= b4 - a1*y_1 - a2*y_2 - a3*y_3 - a4*y_4; //n = k = 4
                 break;
             case 5:
-                H[i][REAL]= b5 - a1*y_menos_1 - a2*y_menos_2 - a3*y_menos_3 - a4*y_menos_4 - a5*y_menos_5; // Idem
+                H[i][REAL]= b5 - a1*y_1 - a2*y_2 - a3*y_3 - a4*y_4 - a5*y_5; // Idem
                 break;
             case 6:
-                H[i][REAL]= b6 - a1*y_menos_1 - a2*y_menos_2 - a3*y_menos_3 - a4*y_menos_4 - a5*y_menos_5 - a6*y_menos_6; //Idem
+                H[i][REAL]= b6 - a1*y_1 - a2*y_2 - a3*y_3 - a4*y_4 - a5*y_5 - a6*y_6; //Idem
                 break;
             default:
-                H[i][REAL]= -a1*y_menos_1 - a2*y_menos_2 - a3*y_menos_3 - a4*y_menos_4 - a5*y_menos_5 - a6*y_menos_6; // n > 6
+                H[i][REAL]= -a1*y_1 - a2*y_2 - a3*y_3 - a4*y_4 - a5*y_5 - a6*y_6; // n > 6
                 break;
             }
-            y_menos_6 = y_menos_5; //Reasignación de salidas anteriores
-            y_menos_5 = y_menos_4;
-            y_menos_4 = y_menos_3;
-            y_menos_3 = y_menos_2;
-            y_menos_2 = y_menos_1;
-            y_menos_1 = H[i][REAL];
+            y_6 = y_5; //Reasignación de salidas anteriores
+            y_5 = y_4;
+            y_4 = y_3;
+            y_3 = y_2;
+            y_2 = y_1;
+            y_1 = H[i][REAL];
         }
         else{
             H[i][REAL]=0;
