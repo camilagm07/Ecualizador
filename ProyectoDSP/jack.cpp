@@ -16,6 +16,14 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+/**
+ * \file   jack.h
+ *         Implements the sound subsystem
+ * \author Pablo Alvarado
+ * \date   2010.12.12
+ *
+ * $Id: equalizer.cpp $
+ */
 
 #include "jack.h"
 

@@ -16,7 +16,14 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-
+/**
+ * \file   freqFilter.h
+ *         Implements filtering in the frequency domain
+ * \author Pablo Alvarado/Jose Miguel Barboza
+ * \date   2010.12.12/2017.05.26
+ *
+ * $Id: equalizer.cpp $
+ */
 
 #include "dspsystem.h"
 #include <cstring>

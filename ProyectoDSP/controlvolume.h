@@ -28,6 +28,7 @@
 
 #ifndef CONTROLVOLUME_H
 #define CONTROLVOLUME_H
+#include<fftw3.h>
 
 /**
  * Control Volume class
@@ -150,13 +151,8 @@ public:
    double da;double db; double dc; double dd;
    double ea;double eb; double ec; double ed;
 
-   bool haux6 = true;
-   bool haux10 = true;
-   double sol6[299];
-   double sol10[299];
-
-
-
+   bool haux = true;
+   double sol[300];
 };
 
 

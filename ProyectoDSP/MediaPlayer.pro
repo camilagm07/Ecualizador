@@ -17,15 +17,15 @@ INCLUDEPATH += /usr/include/
 
 
 SOURCES += main.cpp\
-        mainwindow.cpp \
-    jack.cpp \
-    dspsystem.cpp \
-    controlvolume.cpp
+            mainwindow.cpp \
+            jack.cpp \
+            dspsystem.cpp \
+            controlvolume.cpp
 
-HEADERS  += mainwindow.h \
-            jack.h \
-            processor.h \
-            dspsystem.h \
-    controlvolume.h
+HEADERS += mainwindow.h \
+           jack.h \
+           processor.h \
+           dspsystem.h \
+           controlvolume.h
 
-FORMS    += mainwindow.ui
+FORMS   += mainwindow.ui
