@@ -145,15 +145,6 @@ controlVolume::controlVolume(){
     // variables de temporizacion
     y1=0;y2=0;y3=0;y4=0;y5=0;     //Variable para circuito RC
     y6=0;y7=0;y8=0;y9=0;y10=0;
-
-    //****************************************************************************
-    // variables auxiliares
-    haux6 = true;
-    haux10 = true;
-
-    // variables de solapamiento
-    sol6[299]={0};
-    sol10[299]={0};
 }
 
 
@@ -169,26 +160,22 @@ controlVolume::~controlVolume(){
 
 
 
-
-
-
-
-/**
- * Filtro de 16 kHz de orden 2
+//-------------------------------------------------FILTRO DE 16KHz de orden 6----------------------------------------------------------------///
+/*
+ * Filtro de 16 kHz de orden 8
  * Parametros de entrada:
- * tama;o de bloque
+ * tamaño de bloque
  * ganancia
  * condicion de primer frame
  * puntero entrada
  * puntero salida
  */
-//-------------------------------------------------FILTRO DE 16KHz de orden 6----------------------------------------------------------------///
 void controlVolume::filter(int blockSize, int volumeGain, bool inicial, float *in, float *out){
 
     int N = 2048;
 
-    fftw_complex *x_n;   // se defini puntero para salida de tipo FFT complejo (dos columnas: parte real y parte imaginaria)
-    x_n = (fftw_complex *)fftw_malloc(sizeof(fftw_complex) * N); // Se definie el tamano del puntero de salida
+    fftw_complex *x;   // se defini puntero para salida de tipo FFT complejo (dos columnas: parte real y parte imaginaria)
+    x = (fftw_complex *)fftw_malloc(sizeof(fftw_complex) * N); // Se definie el tamano del puntero de salida
 
     fftw_complex *X;   // se defini puntero para salida de tipo FFT complejo (dos columnas: parte real y parte imaginaria)
     X = (fftw_complex *)fftw_malloc(sizeof(fftw_complex) * N); // Se definie el tamano del puntero de salida
@@ -199,11 +186,11 @@ void controlVolume::filter(int blockSize, int volumeGain, bool inicial, float *i
     fftw_complex *Y;   // se defini puntero para salida de tipo FFT complejo (dos columnas: parte real y parte imaginaria)
     Y = (fftw_complex *)fftw_malloc(sizeof(fftw_complex) * N); // Se definie el tamano del puntero de salida
 
-    fftw_complex *h10;   // se definiti puntero para salida de tipo FFT complejo (dos columnas: parte real y parte imaginaria)
-    h10 = (fftw_complex *)fftw_malloc(sizeof(fftw_complex) * N); // Se definie el tamano del puntero de salida
+    fftw_complex *h;   // se definiti puntero para salida de tipo FFT complejo (dos columnas: parte real y parte imaginaria)
+    h = (fftw_complex *)fftw_malloc(sizeof(fftw_complex) * N); // Se definie el tamano del puntero de salida
 
-    fftw_complex *H10;   // se definiti puntero para salida de tipo FFT complejo (dos columnas: parte real y parte imaginaria)
-    H10 = (fftw_complex *)fftw_malloc(sizeof(fftw_complex) * N); // Se definie el tamano del puntero de salida
+    fftw_complex *H;   // se definiti puntero para salida de tipo FFT complejo (dos columnas: parte real y parte imaginaria)
+    H = (fftw_complex *)fftw_malloc(sizeof(fftw_complex) * N); // Se definie el tamano del puntero de salida
 
     double *out_10 = new double[blockSize];
     double *in_10  = new double[blockSize];
@@ -232,7 +219,6 @@ void controlVolume::filter(int blockSize, int volumeGain, bool inicial, float *i
         fft(h,H); //calcula H[k]
 
 
-
     for(int i=0;i<300;i++){  // introduce los ultimos 300 del x[n-1]
         x[i][REAL]=sol10[i];
         x[i][IMAG]=0;
@@ -245,10 +231,6 @@ void controlVolume::filter(int blockSize, int volumeGain, bool inicial, float *i
             sol10[i-725][IMAG]=0;
         }
     }
-
-
-
-
 
     for(int i=0;i<blockSize;i++){  // Y(k)=H[k]*X[k]
         Y[i][REAL]=H[i][REAL]*X[i][REAL]-H[i][IMAG]*X[i][IMAG];
@@ -274,89 +256,25 @@ void controlVolume::filter(int blockSize, int volumeGain, bool inicial, float *i
       // se eliminan los punteros
       //delete tmpout_g;
       delete out_10;
-}
-//-------------------------------------------------FILTRO DE 16kHz----------------------------------------------------------------------------//
-void controlVolume::filter_16k(int blockSize, int volumeGain, bool inicial, float *in, float *out){
-    double *tmpout_g=new double[blockSize]; //temporal out de filtro 1KHz
-    double *tmpout_h=new double[blockSize];
-    double *vv=new double[blockSize];
-    double *out_9=new double[blockSize];
-
-    if(inicial){
-        _debug("filtro de 16kHz---------------------------------------------------------------------------------------------------" << std::endl);
-        for(int n=0;n<blockSize;++n){
-
-            if(n==0){
-                tmpout_g[n]=(0.461458956205969)*in[n];
-                vv[n]=tmpout_g[n];
-                tmpout_h[n]=(0.461458956205969)*vv[n];
-                out_9[n]=tmpout_h[n];
-            }
-            else if(n==1){
-                tmpout_g[n]=(0.461458956205969)*in[n]-(1.7095134913754697)*tmpout_g[n-1];
-                vv[n]=tmpout_g[n]+(-1.9993838203865224)*tmpout_g[n-1];
-                tmpout_h[n]=(0.461458956205969)*vv[n]-(0.079088755692801688)*tmpout_h[n-1];
-                out_9[n]=tmpout_h[n]+(1.9999877183123331)*tmpout_h[n-1];
-            }
-            else{
-                tmpout_g[n]=(0.461458956205969)*in[n]-(1.7095134913754697)*tmpout_g[n-1]-(0.78741357967987191)*tmpout_g[n-2];
-                vv[n]=tmpout_g[n]+(-1.9993838203865224)*tmpout_g[n-1]+tmpout_g[n-2];
-                tmpout_h[n]=(0.461458956205969)*vv[n]-(0.079088755692801688)*tmpout_h[n-1]-(0.42178984968282446)*tmpout_h[n-2];
-                out_9[n]=tmpout_h[n]+(1.9999877183123331)*tmpout_h[n-1]+tmpout_h[n-2];
-            }
-            out[n]=(0.02)*(volumeGain)*static_cast<float>(out_9[n]);
-        }
-
-     }
-    else{
-          _debug("aqui estoy---------------------------------------------------------------------------------------------------" << std::endl);
-
-            for(int n=0;n<blockSize;++n){
-
-                if(n==0){
-                    tmpout_g[n]=(0.461458956205969)*in[n]-(1.7095134913754697)*db-(0.78741357967987191)*da;
-                    vv[n]=tmpout_g[n]+(-1.9993838203865224)*db+da;
-                    tmpout_h[n]=(0.461458956205969)*vv[n]-(0.079088755692801688)*dd-(0.42178984968282446)*dc;
-                    out_9[n]=tmpout_h[n]+(1.9999877183123331)*dd+dc;
-                }
-                else if(n==1){
-                    tmpout_g[n]=(0.461458956205969)*in[n]-(1.7095134913754697)*tmpout_g[n-1]-(0.78741357967987191)*db;
-                    vv[n]=tmpout_g[n]+(-1.9993838203865224)*tmpout_g[n-1]+db;
-                    tmpout_h[n]=(0.461458956205969)*vv[n]-(0.079088755692801688)*tmpout_h[n-1]-(0.42178984968282446)*dd;
-                    out_9[n]=tmpout_h[n]+(1.9999877183123331)*tmpout_h[n-1]+dd;
-                }
-                else{
-                    tmpout_g[n]=(0.461458956205969)*in[n]-(1.7095134913754697)*tmpout_g[n-1]-(0.78741357967987191)*tmpout_g[n-1];
-                    vv[n]=tmpout_g[n]+(-1.9993838203865224)*tmpout_g[n-1]+tmpout_g[n-2];
-                    tmpout_h[n]=(0.461458956205969)*vv[n]-(0.079088755692801688)*tmpout_h[n-1]-(0.42178984968282446)*tmpout_h[n-2];
-                    out_9[n]=tmpout_h[n]+(1.9999877183123331)*tmpout_h[n-1]+tmpout_h[n-2];
-                }
-                out[n]=(0.02)*(volumeGain)*static_cast<float>(out_9[n]);
-            }
-       }
-
-
-      da=tmpout_g[1022];//w1(-2)//m
-      db=tmpout_g[1023];//w1(-1)//o
-      dc=tmpout_h[1022];//w2(-2)//p
-      dd=tmpout_h[1023];//w2(-1)//q
-
-      delete tmpout_g;
-      delete tmpout_h;
-      delete vv;
-      delete out_9;
+      delete in_10;
+      fftw_free(x);
+      fftw_free(X);
+      fftw_free(Y);
+      fftw_free(h);
+      fftw_free(H);
 }
 
-/**
- * Filtro de 8 kHz de orden 4
+
+//-------------------------------------------------FILTRO DE 8KHz------------------------------------------------------------------------------//
+/*
+ * Filtro de 8 kHz de orden 6
  * Parametros de entrada:
- * tama;o de bloque
+ * tamaño de bloque
  * ganancia
  * condicion de primer frame
  * puntero entrada
  * puntero salida
  */
-//-------------------------------------------------FILTRO DE 8KHz------------------------------------------------------------------------------//
 void controlVolume::filter_8k(int blockSize, int volumeGain, bool inicial, float *in, float *out){
     // constantes del filtro, definidas como tipo double
     double s_8=0.32728065435704007;//ganancia de inicio, filtros comparten ganancia
@@ -597,7 +515,6 @@ void controlVolume::filter_1k(int blockSize, int volumeGain, bool inicial, float
       //delete tmpout_2;
       delete out_6;
 }
-
 
 //-------------------------------------------------FILTRO DE 2KHz------------------------------------------------------------------------------//
 void controlVolume::filter_2k(int blockSize, int volumeGain, bool inicial, float *in, float *out){//filtro de 2kHz
@@ -1097,7 +1014,9 @@ void controlVolume::filter_31_5(int blockSize, int volumeGain, bool inicial, flo
       delete out_0;
 }
 
-/**
+
+//-------------------------------------------------Ecualizador Final------------------------------------------------------------------------------//
+/*
  * Ecualizador Digital
  * Parametros de entrada:
  * tama;o de bloque
@@ -1116,8 +1035,6 @@ void controlVolume::filter_31_5(int blockSize, int volumeGain, bool inicial, flo
  * puntero de entrada direccionado a datos de cancion
  * punetro de salida de DSP aplicado
  */
-//-------------------------------------------------Ecualizador Final------------------------------------------------------------------------------//
-
 void controlVolume::eq(int blockSize, int volumeGain, int g1, int g2, int g3, int g4, int g5, int g6, int g7, int g8, int g9,int g10, bool inicial, float* in, float* out){
     // se definen punterios temporales de tipo float para la salida de cada filtro
     float *tmp= new float[blockSize];
