@@ -592,10 +592,10 @@ void MainWindow::paintEvent(QPaintEvent *e)//funcion encargada de graficar el ni
     myPath9.quadTo(Ctrl9,end9);
 
     QLinearGradient myGradient; //genera un sombreado debajo de la grafica
-    myGradient.setColorAt(0,QColor(57, 110, 141,200)); //le da el color deseado en formato RGB
+    myGradient.setColorAt(0,QColor(0, 204, 102,200)); //le da el color deseado en formato RGB
 
     QPen myPen; // tipo de lines
-    myPen.setColor(QColor(57, 110, 141));//color
+    myPen.setColor(QColor(0, 153, 76));//color
     myPen.setWidth(2); // grueso
 
 

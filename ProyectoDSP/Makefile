@@ -35,7 +35,7 @@ MOVE          = mv -f
 TAR           = tar -cf
 COMPRESS      = gzip -9f
 DISTNAME      = MediaPlayer1.0.0
-DISTDIR = /home/camila/Documentos/DSP/Viernes\ 1ero\ Diciembre\ 2\ (2)/.tmp/MediaPlayer1.0.0
+DISTDIR = /home/camila/Documentos/DSP/tiene\ interfaz/.tmp/MediaPlayer1.0.0
 LINK          = g++
 LFLAGS        = -Wl,-rpath,/home/camila/Qt5.9.3/5.9.3/gcc_64/lib
 LIBS          = $(SUBLIBS) -lfftw3 -ljack -lsndfile -L/home/camila/Qt5.9.3/5.9.3/gcc_64/lib -lQt5Widgets -lQt5Gui -lQt5Core -lGL -lpthread 
@@ -222,6 +222,7 @@ DIST          = ../../../Qt5.9.3/5.9.3/gcc_64/mkspecs/features/spec_pre.prf \
 		../../../Qt5.9.3/5.9.3/gcc_64/mkspecs/features/qt_config.prf \
 		../../../Qt5.9.3/5.9.3/gcc_64/mkspecs/linux-g++/qmake.conf \
 		../../../Qt5.9.3/5.9.3/gcc_64/mkspecs/features/spec_post.prf \
+		.qmake.stash \
 		../../../Qt5.9.3/5.9.3/gcc_64/mkspecs/features/exclusive_builds.prf \
 		../../../Qt5.9.3/5.9.3/gcc_64/mkspecs/features/toolchain.prf \
 		../../../Qt5.9.3/5.9.3/gcc_64/mkspecs/features/default_pre.prf \
@@ -422,6 +423,7 @@ Makefile: MediaPlayer.pro ../../../Qt5.9.3/5.9.3/gcc_64/mkspecs/linux-g++/qmake.
 		../../../Qt5.9.3/5.9.3/gcc_64/mkspecs/features/qt_config.prf \
 		../../../Qt5.9.3/5.9.3/gcc_64/mkspecs/linux-g++/qmake.conf \
 		../../../Qt5.9.3/5.9.3/gcc_64/mkspecs/features/spec_post.prf \
+		.qmake.stash \
 		../../../Qt5.9.3/5.9.3/gcc_64/mkspecs/features/exclusive_builds.prf \
 		../../../Qt5.9.3/5.9.3/gcc_64/mkspecs/features/toolchain.prf \
 		../../../Qt5.9.3/5.9.3/gcc_64/mkspecs/features/default_pre.prf \
@@ -607,6 +609,7 @@ Makefile: MediaPlayer.pro ../../../Qt5.9.3/5.9.3/gcc_64/mkspecs/linux-g++/qmake.
 ../../../Qt5.9.3/5.9.3/gcc_64/mkspecs/features/qt_config.prf:
 ../../../Qt5.9.3/5.9.3/gcc_64/mkspecs/linux-g++/qmake.conf:
 ../../../Qt5.9.3/5.9.3/gcc_64/mkspecs/features/spec_post.prf:
+.qmake.stash:
 ../../../Qt5.9.3/5.9.3/gcc_64/mkspecs/features/exclusive_builds.prf:
 ../../../Qt5.9.3/5.9.3/gcc_64/mkspecs/features/toolchain.prf:
 ../../../Qt5.9.3/5.9.3/gcc_64/mkspecs/features/default_pre.prf:
@@ -1011,7 +1014,7 @@ moc_mainwindow.cpp: ../../../Qt5.9.3/5.9.3/gcc_64/include/QtWidgets/QMainWindow 
 		mainwindow.h \
 		moc_predefs.h \
 		../../../Qt5.9.3/5.9.3/gcc_64/bin/moc
-	/home/camila/Qt5.9.3/5.9.3/gcc_64/bin/moc $(DEFINES) --include ./moc_predefs.h -I/home/camila/Qt5.9.3/5.9.3/gcc_64/mkspecs/linux-g++ -I'/home/camila/Documentos/DSP/Viernes 1ero Diciembre 2 (2)' -I/usr/include -I/home/camila/Qt5.9.3/5.9.3/gcc_64/include -I/home/camila/Qt5.9.3/5.9.3/gcc_64/include/QtWidgets -I/home/camila/Qt5.9.3/5.9.3/gcc_64/include/QtGui -I/home/camila/Qt5.9.3/5.9.3/gcc_64/include/QtCore -I/usr/include/c++/5 -I/usr/include/x86_64-linux-gnu/c++/5 -I/usr/include/c++/5/backward -I/usr/lib/gcc/x86_64-linux-gnu/5/include -I/usr/local/include -I/usr/lib/gcc/x86_64-linux-gnu/5/include-fixed -I/usr/include/x86_64-linux-gnu -I/usr/include mainwindow.h -o moc_mainwindow.cpp
+	/home/camila/Qt5.9.3/5.9.3/gcc_64/bin/moc $(DEFINES) --include ./moc_predefs.h -I/home/camila/Qt5.9.3/5.9.3/gcc_64/mkspecs/linux-g++ -I'/home/camila/Documentos/DSP/tiene interfaz' -I/usr/include -I/home/camila/Qt5.9.3/5.9.3/gcc_64/include -I/home/camila/Qt5.9.3/5.9.3/gcc_64/include/QtWidgets -I/home/camila/Qt5.9.3/5.9.3/gcc_64/include/QtGui -I/home/camila/Qt5.9.3/5.9.3/gcc_64/include/QtCore -I/usr/include/c++/5 -I/usr/include/x86_64-linux-gnu/c++/5 -I/usr/include/c++/5/backward -I/usr/lib/gcc/x86_64-linux-gnu/5/include -I/usr/local/include -I/usr/lib/gcc/x86_64-linux-gnu/5/include-fixed -I/usr/include/x86_64-linux-gnu -I/usr/include mainwindow.h -o moc_mainwindow.cpp
 
 compiler_moc_source_make_all:
 compiler_moc_source_clean:
@@ -1733,8 +1736,6 @@ mainwindow.o: mainwindow.cpp mainwindow.h \
 		../../../Qt5.9.3/5.9.3/gcc_64/include/QtWidgets/QSlider \
 		../../../Qt5.9.3/5.9.3/gcc_64/include/QtWidgets/QStatusBar \
 		../../../Qt5.9.3/5.9.3/gcc_64/include/QtWidgets/qstatusbar.h \
-		../../../Qt5.9.3/5.9.3/gcc_64/include/QtWidgets/QToolBar \
-		../../../Qt5.9.3/5.9.3/gcc_64/include/QtWidgets/qtoolbar.h \
 		../../../Qt5.9.3/5.9.3/gcc_64/include/QtWidgets/QToolButton \
 		../../../Qt5.9.3/5.9.3/gcc_64/include/QtWidgets/qtoolbutton.h \
 		../../../Qt5.9.3/5.9.3/gcc_64/include/QtWidgets/qabstractbutton.h \
