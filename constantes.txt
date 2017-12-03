@@ -1,0 +1,199 @@
+// 32 Hz.
+double K = 0.035766470711839;
+double a1 = 0;
+double a2 = -1;
+double a3 = 0;
+double a4 = 0;
+double a5 = 0;
+double a6 = 0;
+double a7 = 0;
+double a8 = 0;
+double b1 = -1.92844944258473;
+double b2 = 0.928467058576322;
+double b3 = 0;
+double b4 = 0;
+double b5 = 0;
+double b6 = 0;
+double b7 = 0;
+double b8 = 0;
+hn(K,a1,a2,a3,a4,a5,a6,a7,a8,b1,b2,b3,b4,b5,b6,b7,b8,h);
+
+// 64 Hz.
+double K = 0.0638909328226402;
+double a1 = 0;
+double a2 = -1;
+double a3 = 0;
+double a4 = 0;
+double a5 = 0;
+double a6 = 0;
+double a7 = 0;
+double a8 = 0;
+double b1 = -1.87214031968798;
+double b2 = 0.87221813435472;
+double b3 = 0;
+double b4 = 0;
+double b5 = 0;
+double b6 = 0;
+double b7 = 0;
+double b8 = 0;
+hn(K,a1,a2,a3,a4,a5,a6,a7,a8,b1,b2,b3,b4,b5,b6,b7,b8,h);
+
+// 125 Hz.
+double K = 0.0538670614364133;
+double a1 = 0;
+double a2 = -1;
+double a3 = 0;
+double a4 = 0;
+double a5 = 0;
+double a6 = 0;
+double a7 = 0;
+double a8 = 0;
+double b1 = -1.89195653221391;
+double b2 = 0.892265877127173;
+double b3 = 0;
+double b4 = 0;
+double b5 = 0;
+double b6 = 0;
+double b7 = 0;
+double b8 = 0;
+hn(K,a1,a2,a3,a4,a5,a6,a7,a8,b1,b2,b3,b4,b5,b6,b7,b8,h);
+
+// 250 Hz.
+double K = 0.000800907037672843;
+double a1 = -3.92481198464225;
+double a2 = 5.77985067675796;
+double a3 = -3.7851736924576;
+double a4 = 0.930136551492041;
+double a5 = 0;
+double a6 = 0;
+double a7 = 0;
+double a8 = 0;
+double b1 = -0.481328715717828;
+double b2 = -1.03734237489002;
+double b3 = -0.481328715717828;
+double b4 = 1;
+double b5 = 0;
+double b6 = 0;
+double b7 = 0;
+double b8 = 0;
+hn(K,a1,a2,a3,a4,a5,a6,a7,a8,b1,b2,b3,b4,b5,b6,b7,b8,h);
+
+// 500 Hz.
+double K = 0.00284081542490329;
+double a1 = -3.84372248782295;
+double a2 = 5.55269143153391;
+double a3 = -3.57348157473152;
+double a4 = 0.864536477390756;
+double a5 = 0;
+double a6 = 0;
+double a7 = 0;
+double a8 = 0;
+double b1 = -0.130547187805725;
+double b2 = -1.73890478496805;
+double b3 = -0.130547187805725;
+double b4 = 1;
+double b5 = 0;
+double b6 = 0;
+double b7 = 0;
+double b8 = 0;
+hn(K,a1,a2,a3,a4,a5,a6,a7,a8,b1,b2,b3,b4,b5,b6,b7,b8,h);
+
+// 1 kHz.
+double K = 0.000409262614240481;
+double a1 = -5.73904408499587;
+double a2 = 13.7892758259963;
+double a3 = -17.754602031527;
+double a4 = 12.9204032623488;
+double a5 = -5.0387879593448;
+double a6 = 0.82276253431545;
+double a7 = 0;
+double a8 = 0;
+double b1 = -2.11909798107263;
+double b2 = 1.23841599355237;
+double b3 = 0;
+double b4 = -1.23841599355237;
+double b5 = 2.11909798107263;
+double b6 = -1;
+double b7 = 0;
+double b8 = 0;
+hn(K,a1,a2,a3,a4,a5,a6,a7,a8,b1,b2,b3,b4,b5,b6,b7,b8,h);
+
+// 2 kHz.
+double K = 0.000970231414197309;
+double a1 = -5.48841719690657;
+double a2 = 12.7942651063558;
+double a3 = -16.2052757814223;
+double a4 = 11.7610381245035;
+double a5 = -4.6383842793288;
+double a6 = 0.777237244878091;
+double a7 = 0;
+double a8 = 0;
+double b1 = -1.27405630632536;
+double b2 = -0.449714962563732;
+double b3 = 0;
+double b4 = 0.449714962563732;
+double b5 = 1.27405630632536;
+double b6 = -1;
+double b7 = 0;
+double b8 = 0;
+hn(K,a1,a2,a3,a4,a5,a6,a7,a8,b1,b2,b3,b4,b5,b6,b7,b8,h);
+
+// 4 kHz.
+double K = 0.000649931517402985;
+double a1 = -5.11984739057556;
+double a2 = 11.5291867282101;
+double a3 = -14.5094894816439;
+double a4 = 10.7524500972001;
+double a5 = -4.45342292600299;
+double a6 = 0.811437702266877;
+double a7 = 0;
+double a8 = 0;
+double b1 = -1.49111638930048;
+double b2 = 0.00365581508920376;
+double b3 = 0;
+double b4 = -0.00365581508920376;
+double b5 = 1.49111638930048;
+double b6 = -1;
+double b7 = 0;
+double b8 = 0;
+hn(K,a1,a2,a3,a4,a5,a6,a7,a8,b1,b2,b3,b4,b5,b6,b7,b8,h);
+
+// 8 kHz.
+double K = 0.0305879973691657;
+double a1 = -1.7904118543858;
+double a2 = 2.77307718603103;
+double a3 = -2.48561443893466;
+double a4 = 2.04168398689785;
+double a5 = -0.910812362274974;
+double a6 = 0.36902133643413;
+double a7 = 0;
+double a8 = 0;
+double b1 = -0.0418178919003749;
+double b2 = -2.87523422267106;
+double b3 = 0;
+double b4 = 2.87523422267106;
+double b5 = 0.0418178919003749;
+double b6 = -1;
+double b7 = 0;
+double b8 = 0;
+hn(K,a1,a2,a3,a4,a5,a6,a7,a8,b1,b2,b3,b4,b5,b6,b7,b8,h);
+
+// 16 kHz.
+double K = 0.0322030478247811;
+double a1 = 4.08388652813182;
+double a2 = 8.10881739310181;
+double a3 = 10.6835815861358;
+double a4 = 10.3961708909533;
+double a5 = 7.5146551670359;
+double a6 = 3.88925305960443;
+double a7 = 1.32749953645413;
+double a8 = 0.234132025906004;
+double b1 = 0.258281798956747;
+double b2 = -3.45362835066451;
+double b3 = -0.221624362721121;
+double b4 = 4.98062979981792;
+double b5 = -0.221624362721121;
+double b6 = -3.45362835066451;
+double b7 = 0.258281798956747;
+double b8 = 1;
+hn(K,a1,a2,a3,a4,a5,a6,a7,a8,b1,b2,b3,b4,b5,b6,b7,b8,h);
