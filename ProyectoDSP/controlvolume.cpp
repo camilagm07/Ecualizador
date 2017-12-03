@@ -58,8 +58,7 @@ void idft(double ent[2048][2],double sal[2048][2]){
     }
 }
 
-
-void hn(double K,double a1,double a2,double a3,double a4,double a5,double a6, double a7, double a8, double b1,double b2,double b3,double b4,double b5,double b6, double b7, double b8, double H[2048][2]){
+void hn8(double K,double a1,double a2,double a3,double a4,double a5,double a6, double a7, double a8, double b1,double b2,double b3,double b4,double b5,double b6, double b7, double b8, double H[2048][2]){
 
 
     float y_1=0, y_2=0, y_3=0, y_4=0, y_5=0, y_6=0, y_7=0, y_8=0; //Init Condiciones iniciales
@@ -115,6 +114,55 @@ void hn(double K,double a1,double a2,double a3,double a4,double a5,double a6, do
     }
 }
 
+
+void hn(double K,double a1,double a2,double a3,double a4,double a5,double a6,double b1,double b2,double b3,double b4,double b5,double b6, double H[2048][2]){
+
+
+    float y_1=0, y_2=0, y_3=0, y_4=0, y_5=0, y_6=0; //Init Condiciones iniciales
+
+    for(int i=0; i<2048; i++){
+        H[i][IMAG] = 0;
+        if(i<300){
+            switch(i){
+            case 0: //Caso n=0. Solo la entrada no retrasada
+                H[i][REAL]= K;
+                break;
+            case 1:
+                H[i][REAL]= K*b1 - a1*y_1; //Caso n=1. Solo entrada retrada con k=1 y salidas enteriores corrrespondietes
+                break;
+            case 2:
+                H[i][REAL]= K*b2 - a1*y_1 - a2*y_2; //Caso n=2, x(n-k) k=2, salidas correspondientes
+                break;
+            case 3:
+                H[i][REAL]= K*b3 - a1*y_1 - a2*y_2 - a3*y_3; //Caso n=3, k=3.
+                break;
+            case 4:
+                H[i][REAL]= K*b4 - a1*y_1 - a2*y_2 - a3*y_3 - a4*y_4; //n = k = 4
+                break;
+            case 5:
+                H[i][REAL]= K*b5 - a1*y_1 - a2*y_2 - a3*y_3 - a4*y_4 - a5*y_5; // Idem
+                break;
+            case 6:
+                H[i][REAL]= K*b6 - a1*y_1 - a2*y_2 - a3*y_3 - a4*y_4 - a5*y_5 - a6*y_6; //Idem
+                break;
+
+            default:
+                H[i][REAL]= -a1*y_1 - a2*y_2 - a3*y_3 - a4*y_4 - a5*y_5 - a6*y_6; // n > 6
+                break;
+            }
+            y_6 = y_5; //Reasignación de salidas anteriores
+            y_5 = y_4;
+            y_4 = y_3;
+            y_3 = y_2;
+            y_2 = y_1;
+            y_1 = H[i][REAL];
+        }
+        else{
+            H[i][REAL]=0;
+        }
+    }
+}
+
 /**
  * Constructor
  */
@@ -153,10 +201,7 @@ controlVolume::~controlVolume(){
 }
 
 
-
-//-------------------------------------------------FILTRO DE 16KHz de orden 6----------------------------------------------------------------///
-
-/*
+/**
  * Filtro de 16 kHz de orden 2
  * Parametros de entrada:
  * tama;o de bloque
@@ -165,27 +210,28 @@ controlVolume::~controlVolume(){
  * puntero entrada
  * puntero salida
  */
+//-------------------------------------------------FILTRO DE 16KHz de orden 6----------------------------------------------------------------///
 void controlVolume::filter_16k(int blockSize, int volumeGain, bool inicial, float *in, float *out){
 
-    int tamano = 2048;
+    int N = 2048;
 
-    fftw_complex *x;
-    x = (fftw_complex *)fftw_malloc(sizeof(fftw_complex) * tamano);
+    fftw_complex *x_n;
+    x_n = (fftw_complex *)fftw_malloc(sizeof(fftw_complex) * N);;
 
     fftw_complex *X;
-    X = (fftw_complex *)fftw_malloc(sizeof(fftw_complex) * tamano);
+    X = (fftw_complex *)fftw_malloc(sizeof(fftw_complex) * N);;
 
     fftw_complex *y;
-    y = (fftw_complex *)fftw_malloc(sizeof(fftw_complex) * tamano);
+    y = (fftw_complex *)fftw_malloc(sizeof(fftw_complex) * N);;
 
     fftw_complex *Y;
-    Y = (fftw_complex *)fftw_malloc(sizeof(fftw_complex) * tamano);
+    Y = (fftw_complex *)fftw_malloc(sizeof(fftw_complex) * N);;
 
     fftw_complex *h10;
-    h10 = (fftw_complex *)fftw_malloc(sizeof(fftw_complex) * tamano);
+    h10 = (fftw_complex *)fftw_malloc(sizeof(fftw_complex) * N);;
 
     fftw_complex *H10;
-    H10 = (fftw_complex *)fftw_malloc(sizeof(fftw_complex) * tamano);
+    H10 = (fftw_complex *)fftw_malloc(sizeof(fftw_complex) * N);;
 
     double *out_10 = new double[blockSize];
     double *in_10  = new double[blockSize];
@@ -195,6 +241,27 @@ void controlVolume::filter_16k(int blockSize, int volumeGain, bool inicial, floa
         haux=false;
     }
 
+
+    double K = 0.0322030478247811;
+    double b1 = 4.08388652813182;
+    double b2 = 8.10881739310181;
+    double b3 = 10.6835815861358;
+    double b4 = 10.3961708909533;
+    double b5 = 7.5146551670359;
+    double b6 = 3.88925305960443;
+    double b7 = 1.32749953645413;
+    double b8 = 0.234132025906004;
+    double a1 = 0.258281798956747;
+    double a2 = -3.45362835066451;
+    double a3 = -0.221624362721121;
+    double a4 = 4.98062979981792;
+    double a5 = -0.221624362721121;
+    double a6 = -3.45362835066451;
+    double a7 = 0.258281798956747;
+    double a8 = 1;
+    hn8(K,a1,a2,a3,a4,a5,a6,a7,a8,b1,b2,b3,b4,b5,b6,b7,b8,h10);
+
+   /*
     double K=0.07875912;
     double a1=3.44387319;
     double a2=5.29844359;
@@ -202,43 +269,34 @@ void controlVolume::filter_16k(int blockSize, int volumeGain, bool inicial, floa
     double a4=3.47957963;
     double a5=1.47740514;
     double a6=0.28411879;
-    double a7=0;
-    double a8=0;
     double b1=0.04060383;
     double b2=-2.91809914;
     double b3=0;
     double b4=2.91809914;
     double b5=-0.04060383;
     double b6=-1;
-    double b7=0;
-    double b8=0;
-
-
-    hn(K,a1,a2,a3,a4,a5,a6,a7,a8,b1,b2,b3,b4,b5,b6,b7,b8,h10);
+    hn(K,a1,a2,a3,a4,a5,a6,b1,b2,b3,b4,b5,b6,h10);
+    */
 
     fft(h10,H10); //calcula H[k]
 
-
-
-    // SOLAPAMIENTO
-
     for(int i=0;i<2048;i++){  // introduce los ultimos 300 del x[n-1]
         if (i<300){
-                x[i][REAL]= sol[i];
-                x[i][IMAG]= 0;
+                x_n[i][REAL]= sol[i];
+                x_n[i][IMAG]= 0;
                 sol[i] = in_10[724 + i];
             }
 
         else {
             if(i<1324){
                     in_10[i-300]=static_cast<double>(in[i-300]);
-                    x[i][REAL] = in_10[i-300];
-                    x[i][IMAG] = 0;
+                    x_n[i][REAL] = in_10[i-300];
+                    x_n[i][IMAG] = 0;
                }
 
             else {
-                x[i][REAL] = 0;
-                x[i][IMAG] = 0;
+                x_n[i][REAL] = 0;
+                x_n[i][IMAG] = 0;
             }
         }
     }
@@ -247,7 +305,7 @@ void controlVolume::filter_16k(int blockSize, int volumeGain, bool inicial, floa
         sol[i] = in_10[724 + i];
     }
 
-    fft(x,X); //calcula X[k]
+    fft(x_n,X); //calcula X[k]
 
     for(int i=0;i<2048;i++){  // Y(k)=H[k]X[k]
         Y[i][REAL]=H10[i][REAL]*X[i][REAL]-H10[i][IMAG]*X[i][IMAG];
@@ -262,19 +320,16 @@ void controlVolume::filter_16k(int blockSize, int volumeGain, bool inicial, floa
         out[n]=static_cast<float>(out_10[n]);// se hace conversion de double a float
     }
 
-    energia16000=FFT(blockSize,out_10);//se determina la energia de la banda
+//    energia16000=FFT(blockSize,out_10);//se determina la energia de la banda
 
     delete out_10;
     delete in_10;
-    fftw_free(x);
+    fftw_free(x_n);
     fftw_free(X);
     fftw_free(Y);
     fftw_free(h10);
     fftw_free(H10);
 }
-
-
-//-------------------------------------------------FILTRO DE 8KHz------------------------------------------------------------------------------//
 
 /*
  * Filtro de 8 kHz de orden 4
@@ -285,73 +340,69 @@ void controlVolume::filter_16k(int blockSize, int volumeGain, bool inicial, floa
  * puntero entrada
  * puntero salida
  */
-
+//-------------------------------------------------FILTRO DE 8KHz------------------------------------------------------------------------------//
 void controlVolume::filter_8k(int blockSize, int volumeGain, bool inicial, float *in, float *out){
 
-        int tamano = 2048;
-        fftw_complex *x;
-        x = (fftw_complex *)fftw_malloc(sizeof(fftw_complex) * tamano);
+        int N = 2048;
+        fftw_complex *x_n;
+        x_n = (fftw_complex *)fftw_malloc(sizeof(fftw_complex) * N);
 
         fftw_complex *X;
-        X = (fftw_complex *)fftw_malloc(sizeof(fftw_complex) * tamano);
+        X = (fftw_complex *)fftw_malloc(sizeof(fftw_complex) * N);
 
         fftw_complex *y;
-        y = (fftw_complex *)fftw_malloc(sizeof(fftw_complex) * tamano);
+        y = (fftw_complex *)fftw_malloc(sizeof(fftw_complex) * N);
 
         fftw_complex *Y;
-        Y = (fftw_complex *)fftw_malloc(sizeof(fftw_complex) * tamano);
+        Y = (fftw_complex *)fftw_malloc(sizeof(fftw_complex) * N);
 
         fftw_complex *h8;
-        h8 = (fftw_complex *)fftw_malloc(sizeof(fftw_complex) * tamano);
+        h8 = (fftw_complex *)fftw_malloc(sizeof(fftw_complex) * N);
 
         fftw_complex *H8;
-        H8 = (fftw_complex *)fftw_malloc(sizeof(fftw_complex) * tamano);
+        H8 = (fftw_complex *)fftw_malloc(sizeof(fftw_complex) * N);
 
         double *out_8 = new double[blockSize];
         double *in_8  = new double[blockSize];
 
-        double K = 0.0305879973691657;
-        double a1 = -1.7904118543858;
-        double a2 = 2.77307718603103;
-        double a3 = -2.48561443893466;
-        double a4 = 2.04168398689785;
-        double a5 = -0.910812362274974;
-        double a6 = 0.36902133643413;
-        double a7 = 0;
-        double a8 = 0;
-        double b1 = -0.0418178919003749;
-        double b2 = -2.87523422267106;
-        double b3 = 0;
-        double b4 = 2.87523422267106;
-        double b5 = 0.0418178919003749;
-        double b6 = -1;
-        double b7 = 0;
-        double b8 = 0;
+        double K=0.053112641461914;
+        double a1=-1.9169039;
+        double a2=2.5196505;
+        double a3=-2.193798;
+        double a4=1.59289986;
+        double a5=-0.682246;
+        double a6=0.2157868;
+        double b1=-1.9169039;
+        double b2=2.5196505;
+        double b3=-2.193798;
+        double b4=1.59289986;
+        double b5=-0.682246;
+        double b6=0.2157868;
 
-        hn(K,a1,a2,a3,a4,a5,a6,a7,a8,b1,b2,b3,b4,b5,b6,b7,b8,h8);
+        hn(K,a1,a2,a3,a4,a5,a6,b1,b2,b3,b4,b5,b6,h8);
         fft(h8,H8); //calcula H[k]
 
         for(int i=0;i<2048;i++){  // introduce los ultimos 300 del x[n-1]
             if (i<300){
-                    x[i][REAL]= sol[i];
-                    x[i][IMAG]= 0;
+                    x_n[i][REAL]= sol[i];
+                    x_n[i][IMAG]= 0;
                 }
 
             else {
                 if(i<1324){
                         in_8[i-300]=static_cast<double>(in[i-300]);
-                        x[i][REAL] = in_8[i-300];
-                        x[i][IMAG] = 0;
+                        x_n[i][REAL] = in_8[i-300];
+                        x_n[i][IMAG] = 0;
                    }
 
                 else {
-                    x[i][REAL] = 0;
-                    x[i][IMAG] = 0;
+                    x_n[i][REAL] = 0;
+                    x_n[i][IMAG] = 0;
                 }
             }
         }
 
-        fft(x,X); //calcula X[k]
+        fft(x_n,X); //calcula X[k]
 
         for(int i=0;i<2048;i++){  // Y(k)=H[k]X[k]
             Y[i][REAL]=H8[i][REAL]*X[i][REAL]-H8[i][IMAG]*X[i][IMAG];
@@ -370,7 +421,7 @@ void controlVolume::filter_8k(int blockSize, int volumeGain, bool inicial, float
 
         delete out_8;
         delete in_8;
-        fftw_free(x);
+        fftw_free(x_n);
         fftw_free(X);
         fftw_free(Y);
         fftw_free(h8);
@@ -380,70 +431,66 @@ void controlVolume::filter_8k(int blockSize, int volumeGain, bool inicial, float
 //-------------------------------------------------FILTRO DE 4KHz------------------------------------------------------------------------------//
 void controlVolume::filter_4k(int blockSize, int volumeGain, bool inicial, float *in, float *out){//filtro de 2kHz
 
-    int tamano = 2048;
-    fftw_complex *x;
-    x = (fftw_complex *)fftw_malloc(sizeof(fftw_complex) * tamano);
+    int N = 2048;
+    fftw_complex *x_n;
+    x_n = (fftw_complex *)fftw_malloc(sizeof(fftw_complex) * N);
 
     fftw_complex *X;
-    X = (fftw_complex *)fftw_malloc(sizeof(fftw_complex) * tamano);
+    X = (fftw_complex *)fftw_malloc(sizeof(fftw_complex) * N);
 
     fftw_complex *y;
-    y = (fftw_complex *)fftw_malloc(sizeof(fftw_complex) * tamano);
+    y = (fftw_complex *)fftw_malloc(sizeof(fftw_complex) * N);
 
     fftw_complex *Y;
-    Y = (fftw_complex *)fftw_malloc(sizeof(fftw_complex) * tamano);
+    Y = (fftw_complex *)fftw_malloc(sizeof(fftw_complex) * N);
 
     fftw_complex *h4;
-    h4 = (fftw_complex *)fftw_malloc(sizeof(fftw_complex) * tamano);
+    h4 = (fftw_complex *)fftw_malloc(sizeof(fftw_complex) * N);
 
     fftw_complex *H4;
-    H4 = (fftw_complex *)fftw_malloc(sizeof(fftw_complex) * tamano);
+    H4 = (fftw_complex *)fftw_malloc(sizeof(fftw_complex) * N);
 
     double *out_4 = new double[blockSize];
     double *in_4  = new double[blockSize];
 
-    double K = 0.000649931517402985;
-    double a1 = -5.11984739057556;
-    double a2 = 11.5291867282101;
-    double a3 = -14.5094894816439;
-    double a4 = 10.7524500972001;
-    double a5 = -4.45342292600299;
-    double a6 = 0.811437702266877;
-    double a7 = 0;
-    double a8 = 0;
-    double b1 = -1.49111638930048;
-    double b2 = 0.00365581508920376;
-    double b3 = 0;
-    double b4 = -0.00365581508920376;
-    double b5 = 1.49111638930048;
-    double b6 = -1;
-    double b7 = 0;
-    double b8 = 0;
+    double K=0.00984297968973;
+    double a1=-4.4129656;
+    double a2=8.73772265;
+    double a3=-9.880698;
+    double a4=6.73270664;
+    double a5=-2.622295;
+    double a6=0.4606623;
+    double b1=-4.41;
+    double b2=2.5196505;
+    double b3=-2.193798;
+    double b4=1.59289986;
+    double b5=-0.682246;
+    double b6=0.2157868;
 
-    hn(K,a1,a2,a3,a4,a5,a6,a7,a8,b1,b2,b3,b4,b5,b6,b7,b8,h4);
+    hn(K,a1,a2,a3,a4,a5,a6,b1,b2,b3,b4,b5,b6,h4);
     fft(h4,H4); //calcula H[k]
 
     for(int i=0;i<2048;i++){  // introduce los ultimos 300 del x[n-1]
         if (i<300){
-                x[i][REAL]= sol[i];
-                x[i][IMAG]= 0;
+                x_n[i][REAL]= sol[i];
+                x_n[i][IMAG]= 0;
             }
 
         else {
             if(i<1324){
                     in_4[i-300]=static_cast<double>(in[i-300]);
-                    x[i][REAL] = in_4[i-300];
-                    x[i][IMAG] = 0;
+                    x_n[i][REAL] = in_4[i-300];
+                    x_n[i][IMAG] = 0;
                }
 
             else {
-                x[i][REAL] = 0;
-                x[i][IMAG] = 0;
+                x_n[i][REAL] = 0;
+                x_n[i][IMAG] = 0;
             }
         }
     }
 
-    fft(x,X); //calcula X[k]
+    fft(x_n,X); //calcula X[k]
 
     for(int i=0;i<2048;i++){  // Y(k)=H[k]X[k]
         Y[i][REAL]=H4[i][REAL]*X[i][REAL]-H4[i][IMAG]*X[i][IMAG];
@@ -462,7 +509,7 @@ void controlVolume::filter_4k(int blockSize, int volumeGain, bool inicial, float
 
     delete out_4;
     delete in_4;
-    fftw_free(x);
+    fftw_free(x_n);
     fftw_free(X);
     fftw_free(Y);
     fftw_free(h4);
@@ -472,70 +519,66 @@ void controlVolume::filter_4k(int blockSize, int volumeGain, bool inicial, float
 //-------------------------------------------------FILTRO DE 1KHz------------------------------------------------------------------------------//
 void controlVolume::filter_1k(int blockSize, int volumeGain, bool inicial, float *in, float *out){//filtro de 1kHz
 
-    int tamano = 2048;
-    fftw_complex *x;
-    x = (fftw_complex *)fftw_malloc(sizeof(fftw_complex) * tamano);
+    int N = 2048;
+    fftw_complex *x_n;
+    x_n = (fftw_complex *)fftw_malloc(sizeof(fftw_complex) * N);;
 
     fftw_complex *X;
-    X = (fftw_complex *)fftw_malloc(sizeof(fftw_complex) * tamano);
+    X = (fftw_complex *)fftw_malloc(sizeof(fftw_complex) * N);;
 
     fftw_complex *y;
-    y = (fftw_complex *)fftw_malloc(sizeof(fftw_complex) * tamano);
+    y = (fftw_complex *)fftw_malloc(sizeof(fftw_complex) * N);;
 
     fftw_complex *Y;
-    Y = (fftw_complex *)fftw_malloc(sizeof(fftw_complex) * tamano);
+    Y = (fftw_complex *)fftw_malloc(sizeof(fftw_complex) * N);;
 
     fftw_complex *h1;
-    h1 = (fftw_complex *)fftw_malloc(sizeof(fftw_complex) * tamano);
+    h1 = (fftw_complex *)fftw_malloc(sizeof(fftw_complex) * N);;
 
     fftw_complex *H1;
-    H1 = (fftw_complex *)fftw_malloc(sizeof(fftw_complex) * tamano);
+    H1 = (fftw_complex *)fftw_malloc(sizeof(fftw_complex) * N);;
 
     double *out_1 = new double[blockSize];
     double *in_1 = new double[blockSize];
 
-    double K = 0.000409262614240481;
-    double a1 = -5.73904408499587;
-    double a2 = 13.7892758259963;
-    double a3 = -17.754602031527;
-    double a4 = 12.9204032623488;
-    double a5 = -5.0387879593448;
-    double a6 = 0.82276253431545;
-    double a7 = 0;
-    double a8 = 0;
-    double b1 = -2.11909798107263;
-    double b2 = 1.23841599355237;
-    double b3 = 0;
-    double b4 = -1.23841599355237;
-    double b5 = 2.11909798107263;
-    double b6 = -1;
-    double b7 = 0;
-    double b8 = 0;
+    double K=0.053112641461914;
+    double a1=-1.9169039;
+    double a2=2.5196505;
+    double a3=-2.193798;
+    double a4=1.59289986;
+    double a5=-0.682246;
+    double a6=0.2157868;
+    double b1=-1.9169039;
+    double b2=2.5196505;
+    double b3=-2.193798;
+    double b4=1.59289986;
+    double b5=-0.682246;
+    double b6=0.2157868;
 
-    hn(K,a1,a2,a3,a4,a5,a6,a7,a8,b1,b2,b3,b4,b5,b6,b7,b8,h1);
+    hn(K,a1,a2,a3,a4,a5,a6,b1,b2,b3,b4,b5,b6,h1);
     fft(h1,H1); //calcula H[k]
 
     for(int i=0;i<2048;i++){  // introduce los ultimos 300 del x[n-1]
         if (i<300){
-                x[i][REAL]= sol[i];
-                x[i][IMAG]= 0;
+                x_n[i][REAL]= sol[i];
+                x_n[i][IMAG]= 0;
             }
 
         else {
             if(i<1324){
                     in_1[i-300]=static_cast<double>(in[i-300]);
-                    x[i][REAL] = in_1[i-300];
-                    x[i][IMAG] = 0;
+                    x_n[i][REAL] = in_1[i-300];
+                    x_n[i][IMAG] = 0;
                }
 
             else {
-                x[i][REAL] = 0;
-                x[i][IMAG] = 0;
+                x_n[i][REAL] = 0;
+                x_n[i][IMAG] = 0;
             }
         }
     }
 
-    fft(x,X); //calcula X[k]
+    fft(x_n,X); //calcula X[k]
 
     for(int i=0;i<2048;i++){  // Y(k)=H[k]X[k]
         Y[i][REAL]=H1[i][REAL]*X[i][REAL]-H1[i][IMAG]*X[i][IMAG];
@@ -554,7 +597,7 @@ void controlVolume::filter_1k(int blockSize, int volumeGain, bool inicial, float
 
     delete out_1;
     delete in_1;
-    fftw_free(x);
+    fftw_free(x_n);
     fftw_free(X);
     fftw_free(Y);
     fftw_free(h1);
@@ -1151,25 +1194,25 @@ void controlVolume::eq(int blockSize, int volumeGain, int g1, int g2, int g3, in
 
 int controlVolume::FFT(int blockSize_,double *input){
 
-    int tamano;     // se define el tamano de la DFT
-    tamano=blockSize_;
+    int N;     // se define el tamano de la DFT
+    N=blockSize_;
     double outtotal=0;  // variable para calcular la energia
 
 
 
     fftw_complex *out;
-    out = (fftw_complex *)fftw_malloc(sizeof(fftw_complex) * tamano);
+    out = (fftw_complex *)fftw_malloc(sizeof(fftw_complex) * N);
     fftw_plan my_plan; // se crea variable para almacenar el metodo a ejecutar de la biblbioteca
-    my_plan =fftw_plan_dft_r2c_1d(tamano, input, out,FFTW_ESTIMATE); // se dan a tributos al metodo a utilizar
+    my_plan =fftw_plan_dft_r2c_1d(N, input, out,FFTW_ESTIMATE); // se dan a tributos al metodo a utilizar
     fftw_execute(my_plan); // se ejecuta la FFT, se ejecuta el metodo
 
 
-    for(int i=0;i<(tamano/2)+1;i++) // Se recorre el arreglo y se calcula la energia
+    for(int i=0;i<(N/2)+1;i++) // Se recorre el arreglo y se calcula la energia
     {
-        outtotal=outtotal+((pow(out[i][0],2)+pow(out[i][1],2))/tamano);    // Relacion  de Parseval para obtener la energia de cada banda.
+        outtotal=outtotal+((pow(out[i][0],2)+pow(out[i][1],2))/N);    // Relacion  de Parseval para obtener la energia de cada banda.
     }
 
-    outtotal=10*(2*outtotal-((pow(out[tamano/2][0],2)+pow(out[tamano/2][1],2))/tamano)); // se da una ganancia a la energia para que se visualice correctamente en las barras
+    outtotal=10*(2*outtotal-((pow(out[N/2][0],2)+pow(out[N/2][1],2))/N)); // se da una ganancia a la energia para que se visualice correctamente en las barras
 
     fftw_destroy_plan(my_plan); // se elimina el m[etodo utilizado
     fftw_free(out); // se libera puntero de salida de tipo complejo
