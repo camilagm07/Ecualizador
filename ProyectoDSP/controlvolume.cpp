@@ -62,7 +62,7 @@ void idft(double ent[2048][2], double sal[2048][2]){
 }
 
 
-void hn(double K,double a1,double a2,double a3,double a4,double a5,double a6,double b1,double b2,double b3,double b4,double b5,double b6, double H[1024][2]){
+void hn(double K,double a1,double a2,double a3,double a4,double a5,double a6,double a7, double a8, double b1,double b2,double b3,double b4,double b5,double b6, double b7, double b8, double H[1024][2]){
 
     b1 = K*b1;
     b2 = K*b2;
@@ -70,7 +70,9 @@ void hn(double K,double a1,double a2,double a3,double a4,double a5,double a6,dou
     b4 = K*b4;
     b5 = K*b5;
     b6 = K*b6;
-    float y_1=0, y_2=0, y_3=0, y_4=0, y_5=0, y_6=0; //Init Condiciones iniciales
+    b7 = K*b7;
+    b8 = K*b8;
+    float y_1=0, y_2=0, y_3=0, y_4=0, y_5=0, y_6=0, y_7=0, y_8=0; //Init Condiciones iniciales
 
     for(int i=0; i<2048; i++){
         H[i][IMAG] = 0;
@@ -80,7 +82,7 @@ void hn(double K,double a1,double a2,double a3,double a4,double a5,double a6,dou
                 H[i][REAL]= K;
                 break;
             case 1:
-                H[i][REAL]= b1 - a1*y_1; //Caso n=1. Solo entrada retrada con k=1 y salidas enteriores corrrespondietes
+                H[i][REAL]= b1 - a1*y_1; //Caso n=1. Solo entrada retrasada con k=1 y salidas enteriores corrrespondietes
                 break;
             case 2:
                 H[i][REAL]= b2 - a1*y_1 - a2*y_2; //Caso n=2, x(n-k) k=2, salidas correspondientes
@@ -97,11 +99,20 @@ void hn(double K,double a1,double a2,double a3,double a4,double a5,double a6,dou
             case 6:
                 H[i][REAL]= b6 - a1*y_1 - a2*y_2 - a3*y_3 - a4*y_4 - a5*y_5 - a6*y_6; //Idem
                 break;
-            default:
-                H[i][REAL]= -a1*y_1 - a2*y_2 - a3*y_3 - a4*y_4 - a5*y_5 - a6*y_6; // n > 6
+            case 7:
+                H[i][REAL]= b7 - a1*y_1 - a2*y_2 - a3*y_3 - a4*y_4 - a5*y_5 - a6*y_6 - a7*y_7; //Idem
+                break;
+            case 8:
+                H[i][REAL]= b8 - a1*y_1 - a2*y_2 - a3*y_3 - a4*y_4 - a5*y_5 - a6*y_6 - a7*y_7 - a8*y_8; //Idem
+                break;
+            default: // Resto.
+                H[i][REAL]= -a1*y_1 - a2*y_2 - a3*y_3 - a4*y_4 - a5*y_5 - a6*y_6 - a7*y_7 - a8*y_8; // n > 8
                 break;
             }
-            y_6 = y_5; //Reasignación de salidas anteriores
+            //Reasignación de salidas anteriores
+            y_8 = y_7;
+            y_7 = y_6;
+            y_6 = y_5;
             y_5 = y_4;
             y_4 = y_3;
             y_3 = y_2;
@@ -214,20 +225,24 @@ void controlVolume::filter(int blockSize, int volumeGain, bool inicial, float *i
     }
 
      //calcula el h[n] una sola vez a partir de los coeficientes de la ecuacion de diferencias
-        double K=0.07875912;
-        double a1=3.44387319;
-        double a2=5.29844359;
-        double a3=5.13528975;
-        double a4=3.47957963;
-        double a5=1.47740514;
-        double a6=0.28411879;
-        double b1=0.04060383;
-        double b2=-2.91809914;
-        double b3=0;
-        double b4=2.91809914;
-        double b5=-0.04060383;
-        double b6=-1;
-        hn(K,a1,a2,a3,a4,a5,a6,b1,b2,b3,b4,b5,b6,h);
+        double K = 0.0322030478247811;
+        double a1 = 4.08388652813182;
+        double a2 = 8.10881739310181;
+        double a3 = 10.6835815861358;
+        double a4 = 10.3961708909533;
+        double a5 = 7.5146551670359;
+        double a6 = 3.88925305960443;
+        double a7 = 1.32749953645413;
+        double a8 = 0.234132025906004;
+        double b1 = 0.258281798956747;
+        double b2 = -3.45362835066451;
+        double b3 = -0.221624362721121;
+        double b4 = 4.98062979981792;
+        double b5 = -0.221624362721121;
+        double b6 = -3.45362835066451;
+        double b7 = 0.258281798956747;
+        double b8 = 1;
+        hn(K,a1,a2,a3,a4,a5,a6,a7,a8,b1,b2,b3,b4,b5,b6,b7,b8,h);
         fft(x,X); //calcula X[k]
         fft(h,H); //calcula H[k]
 
@@ -1299,7 +1314,3 @@ int controlVolume::valorbarra10_(){
 }
 
 //-----------------------------------------------------------------------------------------------------------------------------------------------------
-
-
-
-
