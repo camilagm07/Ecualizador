@@ -294,7 +294,10 @@ void controlVolume::filter(int blockSize, int volumeGain, bool inicial, float *i
         out[i] = 0;
     }
     }
-/**
+
+
+ //-------------------------------------------------FILTRO DE 8KHz------------------------------------------------------------------------------//
+/*
  * Filtro de 8 kHz de orden 4
  * Parametros de entrada:
  * tama;o de bloque
@@ -304,8 +307,7 @@ void controlVolume::filter(int blockSize, int volumeGain, bool inicial, float *i
  * puntero salida
  */
 
- //-------------------------------------------------FILTRO DE 8KHz------------------------------------------------------------------------------//
- void controlVolume::filter_8k(int blockSize, int volumeGain, bool inicial, float *in, float *out){
+void controlVolume::filter_8k(int blockSize, int volumeGain, bool inicial, float *in, float *out){
 
      /*
      int N = 2048;
@@ -693,12 +695,9 @@ void controlVolume::filter_4k(int blockSize, int volumeGain, bool inicial, float
 }
 
 
-
-
-
 //-------------------------------------------------FILTRO DE 2KHz------------------------------------------------------------------------------//
 void controlVolume::filter_2k(int blockSize, int volumeGain, bool inicial, float *in, float *out){//filtro de 2kHz
-
+ /*
     int N = 2048;
 
     fftw_complex *x_n;
@@ -932,18 +931,18 @@ void controlVolume::filter_2k(int blockSize, int volumeGain, bool inicial, float
     fftw_free(h2);
     fftw_free(H2);
 }
-  /*
+ */
 
 
     for(int i =0; i<blockSize; i++){
         out[i] = 0;
-    } */
-
+    }
+}
 
     //-------------------------------------------------FILTRO DE 1KHz------------------------------------------------------------------------------//
     void controlVolume::filter_1k(int blockSize, int volumeGain, bool inicial, float *in, float *out){//filtro de 1kHz
 
-      /*  int N = 2048;
+        int N = 2048;
 
         fftw_complex *x_n;
         x_n = (fftw_complex *)fftw_malloc(sizeof(fftw_complex) * N);
@@ -974,207 +973,207 @@ void controlVolume::filter_2k(int blockSize, int volumeGain, bool inicial, float
         for(int i=0;i<2048;i++){
             switch (i) {
             case 0:
-                h1[i][REAL] =  -0.0235199541378082;
+                h1[i][REAL] =  -0.023650272042231;
                 h1[i][IMAG] =   0;
                 break;
             case 1:
-                h1[i][REAL] =  -0.0264861619916144;
+                h1[i][REAL] =  -0.026618037667980;
                 h1[i][IMAG] =   0;
                 break;
             case 2:
-                h1[i][REAL] = -0.0289302160201498;
+                h1[i][REAL] = -0.029057374349268;
                 h1[i][IMAG] =  0;
                 break;
             case 3:
-                h1[i][REAL] =  -0.0307629538588038;
+                h1[i][REAL] =  -0.030880288723826;
                 h1[i][IMAG] =   0;
                 break;
             case 4:
-                h1[i][REAL] =  -0.0319096818766917;
+                h1[i][REAL] =  -0.032013396671849;
                 h1[i][IMAG] =   0;
                 break;
             case 5:
-                h1[i][REAL] =  -0.0323128883267574;
+                h1[i][REAL] =  -0.032400569572086;
                 h1[i][IMAG] =  0;
                 break;
             case 6:
-                h1[i][REAL] =  -0.0319344836203129;
+                h1[i][REAL] =  -0.032005107162238;
                 h1[i][IMAG] =  0;
                 break;
             case 7:
-                h1[i][REAL] =  -0.0307574855438680;
+                h1[i][REAL] =  -0.030811357783519;
                 h1[i][IMAG] =  0;
                 break;
             case 8:
-                h1[i][REAL] =  -0.0287870842025553;
+                h1[i][REAL] =  -0.028825723583863;
                 h1[i][IMAG] =  0;
                 break;
             case 9:
-                h1[i][REAL] =  -0.0260510408724380;
+                h1[i][REAL] =  -0.026077007362987;
                 h1[i][IMAG] =  0;
                 break;
             case 10:
-                h1[i][REAL] =  -0.0225993961386207;
+                h1[i][REAL] =  -0.022616078544242;
                 h1[i][IMAG] =  0;
                 break;
             case 11:
-                h1[i][REAL] =  -0.0185034849841022;
+                h1[i][REAL] =  -0.018514857567865;
                 h1[i][IMAG] =  0;
                 break;
             case 12:
-                h1[i][REAL] =  -0.0138542791281581;
+                h1[i][REAL] =  -0.013864640091910;
                 h1[i][IMAG] =  0;
                 break;
             case 13:
-                h1[i][REAL] =  -0.00876009912665982;
+                h1[i][REAL] =  -0.008773804018898;
                 h1[i][IMAG] =  0;
                 break;
             case 14:
-                h1[i][REAL] =  -0.00334375978218021;
+                h1[i][REAL] =  -0.003364962805808;
                 h1[i][IMAG] =  0;
                 break;
             case 15:
-                h1[i][REAL] =  0.00226076845426822;
+                h1[i][REAL] =  0.002228352934717;
                 h1[i][IMAG] =  0;
                 break;
             case 16:
-                h1[i][REAL] =   0.00791208283868907;
+                h1[i][REAL] =   0.007865387511180;
                 h1[i][IMAG] =   0;
                 break;
             case 17:
-                h1[i][REAL] =   0.0134653437705606;
+                h1[i][REAL] =   0.013402114937636;
                 h1[i][IMAG] =   0;
                 break;
             case 18:
-                h1[i][REAL] =   0.0187764198288526;
+                h1[i][REAL] =   0.01869533605378;
                 h1[i][IMAG] =   0;
                 break;
             case 19:
-                h1[i][REAL] =   0.0237060540948365;
+                h1[i][REAL] =   0.023606792082434;
                 h1[i][IMAG] =   0;
                 break;
             case 20:
-                h1[i][REAL] =   0.0281239218115362;
+                h1[i][REAL] =   0.028007167282193;
                 h1[i][IMAG] =   0;
                 break;
             case 21:
-                h1[i][REAL] =   0.0319124520638059;
+                h1[i][REAL] =   0.031779856061465;
                 h1[i][IMAG] =   0;
                 break;
             case 22:
-                h1[i][REAL] =   0.0349702930006309;
+                h1[i][REAL] =   0.034824376710089;
                 h1[i][IMAG] =   0;
                 break;
             case 23:
-                h1[i][REAL] =   0.0372153109504467;
+                h1[i][REAL] =   0.037059324567409;
                 h1[i][IMAG] =   0;
                 break;
             case 24:
-                h1[i][REAL] =   0.0385870282522493;
+                h1[i][REAL] =   0.038424771639987;
                 h1[i][IMAG] =   0;
                 break;
             case 25:
-                h1[i][REAL] =   0.0390484222660070;
-                h1[i][IMAG] =   0;
-                break;
-            case 26:
-                h1[i][REAL] =   0.0385870282522493;
-                h1[i][IMAG] =   0;
-                break;
-            case 27:
-                h1[i][REAL] =   0.0372153109504467;
-                h1[i][IMAG] =   0;
-                break;
-            case 28:
-                h1[i][REAL] =   0.0349702930006309;
-                h1[i][IMAG] =   0;
-                break;
-            case 29:
-                h1[i][REAL] =   0.0319124520638059;
-                h1[i][IMAG] =   0;
-                break;
-            case 30:
-                h1[i][REAL] =   0.0281239218115362;
-                h1[i][IMAG] =   0;
-                break;
-            case 31:
-                h1[i][REAL] =  0.0237060540948365;
-                h1[i][IMAG] =  0;
-                break;
-            case 32:
-                h1[i][REAL] =  0.0187764198288526;
-                h1[i][IMAG] =  0;
-                break;
-            case 33:
-                h1[i][REAL] =  0.0134653437705606;
-                h1[i][IMAG] =  0;
-                break;
-            case 34:
-                h1[i][REAL] =  0.00791208283868907;
-                h1[i][IMAG] =  0;
-                break;
-            case 35:
-                h1[i][REAL] =  0.00226076845426822;
-                h1[i][IMAG] =  0;
-                break;
-            case 36:
-                h1[i][REAL] =   -0.00334375978218021;
-                h1[i][IMAG] =   0;
-                break;
-            case 37:
-                h1[i][REAL] =   -0.00876009912665982;
-                h1[i][IMAG] =   0;
-                break;
-            case 38:
-                h1[i][REAL] =   -0.0138542791281581;
-                h1[i][IMAG] =   0;
-                break;
-            case 39:
-                h1[i][REAL] =   -0.0185034849841022;
-                h1[i][IMAG] =   0;
-                break;
-            case 40:
-                h1[i][REAL] =   -0.0225993961386207;
-                h1[i][IMAG] =   0;
-                break;
-            case 41:
-                h1[i][REAL] =   -0.0260510408724380;
-                h1[i][IMAG] =   0;
-                break;
-            case 42:
-                h1[i][REAL] =   -0.0287870842025553;
-                h1[i][IMAG] =   0;
-                break;
-            case 43:
-                h1[i][REAL] =   -0.0307574855438680;
-                h1[i][IMAG] =   0;
-                break;
-            case 44:
-                h1[i][REAL] =   -0.0319344836203129;
-                h1[i][IMAG] =   0;
-                break;
-            case 45:
-                h1[i][REAL] =   -0.0323128883267574;
-                h1[i][IMAG] =   0;
-                break;
-            case 46:
-                h1[i][REAL] =   -0.0319096818766917;
-                h1[i][IMAG] =   0;
-                break;
-            case 47:
-                h1[i][REAL] =   -0.0307629538588038;
-                h1[i][IMAG] =   0;
-                break;
-            case 48:
-                h1[i][REAL] =   -0.0289302160201498;
-                h1[i][IMAG] =   0;
-                break;
-            case 49:
-                h1[i][REAL] =   -0.0264861619916144;
+                h1[i][REAL] =   0.038884036946932;
                 h1[i][IMAG] =   0;
                 break;
             case 50:
-                h1[i][REAL] =   -0.0235199541378082;
+                h1[i][REAL] =  -0.023650272042231;
+                h1[i][IMAG] =   0;
+                break;
+            case 49:
+                h1[i][REAL] =  -0.026618037667980;
+                h1[i][IMAG] =   0;
+                break;
+            case 48:
+                h1[i][REAL] = -0.029057374349268;
+                h1[i][IMAG] =  0;
+                break;
+            case 47:
+                h1[i][REAL] =  -0.030880288723826;
+                h1[i][IMAG] =   0;
+                break;
+            case 46:
+                h1[i][REAL] =  -0.032013396671849;
+                h1[i][IMAG] =   0;
+                break;
+            case 45:
+                h1[i][REAL] =  -0.032400569572086;
+                h1[i][IMAG] =  0;
+                break;
+            case 44:
+                h1[i][REAL] =  -0.032005107162238;
+                h1[i][IMAG] =  0;
+                break;
+            case 43:
+                h1[i][REAL] =  -0.030811357783519;
+                h1[i][IMAG] =  0;
+                break;
+            case 42:
+                h1[i][REAL] =  -0.028825723583863;
+                h1[i][IMAG] =  0;
+                break;
+            case 41:
+                h1[i][REAL] =  -0.026077007362987;
+                h1[i][IMAG] =  0;
+                break;
+            case 40:
+                h1[i][REAL] =  -0.022616078544242;
+                h1[i][IMAG] =  0;
+                break;
+            case 39:
+                h1[i][REAL] =  -0.018514857567865;
+                h1[i][IMAG] =  0;
+                break;
+            case 38:
+                h1[i][REAL] =  -0.013864640091910;
+                h1[i][IMAG] =  0;
+                break;
+            case 37:
+                h1[i][REAL] =  -0.008773804018898;
+                h1[i][IMAG] =  0;
+                break;
+            case 36:
+                h1[i][REAL] =  -0.003364962805808;
+                h1[i][IMAG] =  0;
+                break;
+            case 35:
+                h1[i][REAL] =  0.002228352934717;
+                h1[i][IMAG] =  0;
+                break;
+            case 34:
+                h1[i][REAL] =   0.007865387511180;
+                h1[i][IMAG] =   0;
+                break;
+            case 33:
+                h1[i][REAL] =   0.013402114937636;
+                h1[i][IMAG] =   0;
+                break;
+            case 32:
+                h1[i][REAL] =   0.01869533605378;
+                h1[i][IMAG] =   0;
+                break;
+            case 31:
+                h1[i][REAL] =   0.023606792082434;
+                h1[i][IMAG] =   0;
+                break;
+            case 30:
+                h1[i][REAL] =   0.028007167282193;
+                h1[i][IMAG] =   0;
+                break;
+            case 29:
+                h1[i][REAL] =   0.031779856061465;
+                h1[i][IMAG] =   0;
+                break;
+            case 28:
+                h1[i][REAL] =   0.034824376710089;
+                h1[i][IMAG] =   0;
+                break;
+            case 27:
+                h1[i][REAL] =   0.037059324567409;
+                h1[i][IMAG] =   0;
+                break;
+            case 26:
+                h1[i][REAL] =   0.038424771639987;
                 h1[i][IMAG] =   0;
                 break;
             default:
@@ -1235,12 +1234,12 @@ void controlVolume::filter_2k(int blockSize, int volumeGain, bool inicial, float
         fftw_free(h1);
         fftw_free(H1);
 
-*/
+   /*
 
         for(int i =0; i<blockSize; i++){
             out[i] = 0;
         }
-
+    */
     }
 
 
