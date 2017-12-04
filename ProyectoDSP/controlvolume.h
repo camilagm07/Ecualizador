@@ -171,6 +171,9 @@ public:
 
    bool haux250 = true;
    double sol250[220];
+
+   bool haux150 = true;
+   double sol150[300];
 };
 
 
