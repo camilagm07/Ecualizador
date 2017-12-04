@@ -164,7 +164,7 @@ controlVolume::~controlVolume(){
 
 //-------------------------------------------------FILTRO DE 16KHz de orden 2----------------------------------------------------------------///
 void controlVolume::filter(int blockSize, int volumeGain, bool inicial, float *in, float *out){
-        /*
+
         int N = 2048;
 
         fftw_complex *x;
@@ -262,17 +262,17 @@ void controlVolume::filter(int blockSize, int volumeGain, bool inicial, float *i
         fftw_free(h10);
         fftw_free(H10);
 
-        */
+        /*
         for(int i =0; i<blockSize; i++){
             out[i] = 0;
         }
-
+        */
 }
 
 
 //-------------------------------------------------FILTRO DE 8KHz------------------------------------------------------------------------------//
 void controlVolume::filter_8k(int blockSize, int volumeGain, bool inicial, float *in, float *out){
-    /*
+
      int N = 2048;
 
      fftw_complex *x;
@@ -427,17 +427,17 @@ void controlVolume::filter_8k(int blockSize, int volumeGain, bool inicial, float
      fftw_free(h8);
      fftw_free(H8);
 
-     */
+     /*
      for(int i =0; i<blockSize; i++){
          out[i] = 0;
      }
-
+    */
  }
 
 
 //-------------------------------------------------FILTRO DE 4KHz------------------------------------------------------------------------------//
 void controlVolume::filter_4k(int blockSize, int volumeGain, bool inicial, float *in, float *out){//filtro de 2kHz
-    /*
+
     int N = 2048;
 
     fftw_complex *x;
@@ -651,17 +651,17 @@ void controlVolume::filter_4k(int blockSize, int volumeGain, bool inicial, float
     fftw_free(h4);
     fftw_free(H4);
 
-    */
+    /*
     for(int i =0; i<blockSize; i++){
         out[i] = 0;
     }
-
+    */
 }
 
 
 //-------------------------------------------------FILTRO DE 2KHz------------------------------------------------------------------------------//
 void controlVolume::filter_2k(int blockSize, int volumeGain, bool inicial, float *in, float *out){//filtro de 2kHz
-    /*
+
     int N = 2048;
 
     fftw_complex *x;
@@ -895,16 +895,16 @@ void controlVolume::filter_2k(int blockSize, int volumeGain, bool inicial, float
     fftw_free(h2);
     fftw_free(H2);
 
-    */
+    /*
     for(int i =0; i<blockSize; i++){
         out[i] = 0;
     }
-
+    */
 }
 
 //-------------------------------------------------FILTRO DE 1KHz------------------------------------------------------------------------------//
 void controlVolume::filter_1k(int blockSize, int volumeGain, bool inicial, float *in, float *out){//filtro de 1kHz
-        /*
+
         int N = 2048;
 
         fftw_complex *x;
@@ -1197,11 +1197,11 @@ void controlVolume::filter_1k(int blockSize, int volumeGain, bool inicial, float
         fftw_free(h1);
         fftw_free(H1);
 
-        */
+        /*
         for(int i =0; i<blockSize; i++){
             out[i] = 0;
         }
-
+        */
 }
 
 //-------------------------------------------------FILTRO DE 500Hz------------------------------------------------------------------------------//
@@ -4015,177 +4015,7 @@ void controlVolume::filter_125(int blockSize, int volumeGain, bool inicial, floa
     */
 }
 
-
-
-/*
-//-------------------------------------------------FILTRO DE 125Hz------------------------------------------------------------------------------//
-void controlVolume::filter_125(int blockSize, int volumeGain, bool inicial, float *in, float *out){//filtro de 125Hz
-    double s_125=0.011733114619205466;
-    double a_0_125=-1.9904603982304521;
-    double a_1_125=0.99105006098634807;
-    double b_0_125=-0.88514816518196571;
-    double a_2_125=-1.9950728402576143;
-    double a_3_125=0.99523931323078052;
-    double b_1_125=-1.9999999360407035;
-
-    double *tmpout_5=new double[blockSize];
-    double *tmpout_6=new double[blockSize];
-    double *s=new double[blockSize];
-    double *out_2=new double[blockSize];
-
-
-
-    if(inicial){
-        _debug("filtro de 125Hz---------------------------------------------------------------------------------------------------" << std::endl);
-        for(int n=0;n<blockSize;++n){
-
-            if(n==0){
-                tmpout_5[n]=(s_125)*in[n];
-                s[n]=tmpout_5[n];
-                tmpout_6[n]=(s_125)*s[n];
-                out_2[n]=tmpout_5[n];
-            }
-            else if(n==1){
-                tmpout_5[n]=(s_125)*in[n]-(a_0_125)*tmpout_5[n-1];
-                s[n]=tmpout_5[n]+(b_0_125)*tmpout_5[n-1];
-                tmpout_6[n]=(s_125)*s[n]-(a_2_125)*tmpout_6[n-1];
-                out_2[n]=tmpout_6[n]+(b_1_125)*tmpout_6[n-1];
-            }
-            else{
-                tmpout_5[n]=(s_125)*in[n]-(a_0_125)*tmpout_5[n-1]-(a_1_125)*tmpout_5[n-2];
-                s[n]=tmpout_5[n]+(b_0_125)*tmpout_5[n-1]+tmpout_5[n-2];
-                tmpout_6[n]=(s_125)*s[n]-(a_2_125)*tmpout_6[n-1]-(a_3_125)*tmpout_6[n-2];
-                out_2[n]=tmpout_6[n]+(b_1_125)*tmpout_6[n-1]+tmpout_6[n-2];
-            }
-            out_2[n]=(0.02)*(volumeGain)*out_2[n];
-            out[n]=static_cast<float>(out_2[n]);
-        }
-
-     }
-    else{
-
-            for(int n=0;n<blockSize;++n){
-
-                if(n==0){
-                    tmpout_5[n]=(s_125)*in[n]-(a_0_125)*f-(a_1_125)*e;
-                    s[n]=tmpout_5[n]+(b_0_125)*f+e;
-                    tmpout_6[n]=(s_125)*s[n]-(a_2_125)*h-(a_3_125)*g;
-                    out_2[n]=tmpout_6[n]+(b_1_125)*h+g;
-                }
-                else if(n==1){
-                    tmpout_5[n]=(s_125)*in[n]-(a_0_125)*tmpout_5[n-1]-(a_1_125)*f;
-                    s[n]=tmpout_5[n]+(b_0_125)*tmpout_5[n-1]+f;
-                    tmpout_6[n]=(s_125)*s[n]-(a_2_125)*tmpout_6[n-1]-(a_3_125)*h;
-                    out_2[n]=tmpout_6[n]+(b_1_125)*tmpout_6[n-1]+h;
-                }
-                else{
-                    tmpout_5[n]=(s_125)*in[n]-(a_0_125)*tmpout_5[n-1]-(a_1_125)*tmpout_5[n-2];
-                    s[n]=tmpout_5[n]+(b_0_125)*tmpout_5[n-1]+tmpout_5[n-2];
-                    tmpout_6[n]=(s_125)*s[n]-(a_2_125)*tmpout_6[n-1]-(a_3_125)*tmpout_6[n-2];
-                    out_2[n]=tmpout_6[n]+(b_1_125)*tmpout_6[n-1]+tmpout_6[n-2];
-                }
-                out_2[n]=(0.02)*(volumeGain)*out_2[n];
-                out[n]=static_cast<float>(out_2[n]);
-            }
-       }
-
-      energia125=FFT(blockSize,out_2);
-      e=tmpout_5[1022];//w1(-2)
-      f=tmpout_5[1023];//w1(-1)
-      g=tmpout_6[1022];//w2(-2)
-      h=tmpout_6[1023];//w2(-1)
-
-      delete tmpout_5;
-      delete tmpout_6;
-      delete s;
-      delete out_2;
-
-} */
-
-/*//-------------------------------------------------FILTRO DE 63Hz------------------------------------------------------------------------------//
-void controlVolume::filter_63(int blockSize, int volumeGain, bool inicial, float *in, float *out){//filtro de 63Hz
-
-    double s_63=0.01045358600130269;
-    double a_0_63=-1.995367098268765;
-    double a_1_63=0.99551484954682889;
-    double b_0_63=-1.6476735248656746;
-    double a_2_63=-1.9975751976645493;
-    double a_3_63=0.99761686592156373;
-    double b_1_63=-1.9999999840095546;
-    double *tmpout_7=new double[blockSize]; //temporal out de filtro 1KHz
-    double *tmpout_8=new double[blockSize];
-    double *w=new double[blockSize];
-    double *out_3=new double[blockSize];
-
-
-
-    if(inicial){
-        _debug("filtro de 63Hz---------------------------------------------------------------------------------------------------" << std::endl);
-        for(int n=0;n<blockSize;++n){
-
-            if(n==0){
-                tmpout_7[n]=(s_63)*in[n];
-                w[n]=tmpout_7[n];
-                tmpout_8[n]=(s_63)*w[n];
-                out_3[n]=tmpout_8[n];
-            }
-            else if(n==1){
-                tmpout_7[n]=(s_63)*in[n]-(a_0_63)*tmpout_7[n-1];
-                w[n]=tmpout_7[n]+(b_0_63)*tmpout_7[n-1];
-                tmpout_8[n]=(s_63)*w[n]-(a_2_63)*tmpout_8[n-1];
-                out_3[n]=tmpout_8[n]+(b_1_63)*tmpout_8[n-1];
-            }
-            else{
-                tmpout_7[n]=(s_63)*in[n]-(a_0_63)*tmpout_7[n-1]-(a_1_63)*tmpout_7[n-2];
-                w[n]=tmpout_7[n]+(b_0_63)*tmpout_7[n-1]+tmpout_7[n-2];
-                tmpout_8[n]=(s_63)*w[n]-(a_2_63)*tmpout_8[n-1]-(a_3_63)*tmpout_8[n-2];
-                out_3[n]=tmpout_8[n]+(b_1_63)*tmpout_8[n-1]+tmpout_8[n-2];
-            }
-            out_3[n]=(0.02)*(volumeGain)*out_3[n];
-            out[n]=static_cast<float>(out_3[n]);
-        }
-
-     }
-    else{
-
-            for(int n=0;n<blockSize;++n){
-
-                if(n==0){
-                    tmpout_7[n]=(s_63)*in[n]-(a_0_63)*s-(a_1_63)*r;
-                    w[n]=tmpout_7[n]+(b_0_63)*s+r;
-                    tmpout_8[n]=(s_63)*w[n]-(a_2_63)*u-(a_3_63)*t;
-                    out_3[n]=tmpout_8[n]+(b_1_63)*u+t;
-                }
-                else if(n==1){
-                    tmpout_7[n]=(s_63)*in[n]-(a_0_63)*tmpout_7[n-1]-(a_1_63)*s;
-                    w[n]=tmpout_7[n]+(b_0_63)*tmpout_7[n-1]+s;
-                    tmpout_8[n]=(s_63)*w[n]-(a_2_63)*tmpout_8[n-1]-(a_3_63)*u;
-                    out_3[n]=tmpout_8[n]+(b_1_63)*tmpout_8[n-1]+u;
-                }
-                else{
-                    tmpout_7[n]=(s_63)*in[n]-(a_0_63)*tmpout_7[n-1]-(a_1_63)*tmpout_7[n-2];
-                    w[n]=tmpout_7[n]+(b_0_63)*tmpout_7[n-1]+tmpout_7[n-2];
-                    tmpout_8[n]=(s_63)*w[n]-(a_2_63)*tmpout_8[n-1]-(a_3_63)*tmpout_8[n-2];
-                    out_3[n]=tmpout_8[n]+(b_1_63)*tmpout_8[n-1]+tmpout_8[n-2];
-                }
-                out_3[n]=(0.02)*(volumeGain)*out_3[n];
-                out[n]=static_cast<float>(out_3[n]);
-            }
-       }
-
-      energia64=FFT(blockSize,out_3);
-      r=tmpout_7[1022];//w1(-2)//e
-      s=tmpout_7[1023];//w1(-1)//f
-      t=tmpout_8[1022];//w2(-2)//g
-      u=tmpout_8[1023];//w2(-1)//h
-
-      delete tmpout_7;
-      delete tmpout_8;
-      delete w;
-      delete out_3;
-}
-*/
-
+//-------------------------------------------------FILTRO DE 64Hz------------------------------------------------------------------------------//
 void controlVolume::filter_63(int blockSize, int volumeGain, bool inicial, float *in, float *out){//filtro de 63Hz
 
     int N = 2048;
@@ -5686,7 +5516,6 @@ void controlVolume::filter_63(int blockSize, int volumeGain, bool inicial, float
     fftw_free(H64);
 
 }
-
 
 //--------------------------------------------------FILTRO DE 31.5Hz---------------------------------------------------------------------------//
 void controlVolume::filter_31_5(int blockSize, int volumeGain, bool inicial, float *in, float *out){
