@@ -151,8 +151,8 @@ public:
    double da;double db; double dc; double dd;
    double ea;double eb; double ec; double ed;
 
-   bool haux = true;
-   double sol[300];
+   bool haux16 = true;
+   double sol16[300];
 
    bool haux8 = true;
    double sol8[15];

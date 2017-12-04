@@ -1,41 +1,11 @@
-/*
- * DSP Example is part of the DSP Lecture at TEC-Costa Rica
- * Copyright (C) 2017  Pablo Alvarado
- *
- * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <http://www.gnu.org/licenses/>.
- */
-
-/**
- * \file   controlVolume.cpp
- *         Implements 10 bands eq with IIR filters, fourth order
- * \authors Rolando Coto, Daniel Leon, Daniel Sandoval
- * \date   2017.19.06
- *
- * $Id: controlVolume.cpp $
- */
-
 #include "controlvolume.h"
 #include <cmath>
 #include <cstring>
 #include <fftw3.h>
 
-// se agregaron para la DFT
+// Para DFT.
 #include <iostream>
 #include <fstream>
-
-
-
 
 #undef _DSP_DEBUG
 #define _DSP_DEBUG
@@ -47,12 +17,10 @@
 #define _debug(x)
 #endif
 
-
-
-
 #define REAL 0
 #define IMAG 1
 
+/* Cálculo DFT */
 void fft(double ent[2048][2], double sal[2048][2]){
     fftw_plan planfft = fftw_plan_dft_1d(2048, ent, sal, FFTW_FORWARD, FFTW_ESTIMATE);
     fftw_execute(planfft);
@@ -60,54 +28,54 @@ void fft(double ent[2048][2], double sal[2048][2]){
     fftw_cleanup();
 }
 
+/* Cálculo IDFT */
 void idft(double ent[2048][2],double sal[2048][2]){
-    fftw_plan planidft = fftw_plan_dft_1d(2048, ent ,sal, FFTW_BACKWARD, FFTW_ESTIMATE);
+    fftw_plan planidft = fftw_plan_dft_1d(2048, ent , sal, FFTW_BACKWARD, FFTW_ESTIMATE);
     fftw_execute(planidft);
     fftw_destroy_plan(planidft);
     fftw_cleanup();
 
-    for (int i=0; i<2048; i++){ //Normalización
+    for (int i=0; i<2048; i++){ // Normalización.
         sal[i][REAL] /= 2048;
         sal[i][IMAG] /= 2048;
     }
 }
 
-
-void hn(double K,double a1,double a2,double a3,double a4,double a5,double a6,double b1,double b2,double b3,double b4,double b5,double b6, double H[2048][2]){
-
-
-    float y_1=0, y_2=0, y_3=0, y_4=0, y_5=0, y_6=0; //Init Condiciones iniciales
+/* Cálculo de respuesta al impulso */
+void hn(double K, double a1, double a2, double a3, double a4, double a5, double a6, double b1, double b2, double b3, double b4, double b5, double b6, double H[2048][2]){
+    float y_1 = 0, y_2 = 0, y_3 = 0, y_4 = 0, y_5 = 0, y_6 = 0; // Inicialización Condiciones iniciales.
 
     for(int i=0; i<2048; i++){
         H[i][IMAG] = 0;
         if(i<300){
             switch(i){
-            case 0: //Caso n=0. Solo la entrada no retrasada
-                H[i][REAL]= K;
+            case 0: // n=0. Sólo entrada.
+                H[i][REAL] = K;
                 break;
             case 1:
-                H[i][REAL]= K*b1 - a1*y_1; //Caso n=1. Solo entrada retrada con k=1 y salidas enteriores corrrespondietes
+                H[i][REAL] = K*b1 - a1*y_1; // n=1. Retraso 1 muestra.
                 break;
             case 2:
-                H[i][REAL]= K*b2 - a1*y_1 - a2*y_2; //Caso n=2, x(n-k) k=2, salidas correspondientes
+                H[i][REAL] = K*b2 - a1*y_1 - a2*y_2; // n=2.
                 break;
             case 3:
-                H[i][REAL]= K*b3 - a1*y_1 - a2*y_2 - a3*y_3; //Caso n=3, k=3.
+                H[i][REAL] = K*b3 - a1*y_1 - a2*y_2 - a3*y_3; // n=3.
                 break;
             case 4:
-                H[i][REAL]= K*b4 - a1*y_1 - a2*y_2 - a3*y_3 - a4*y_4; //n = k = 4
+                H[i][REAL] = K*b4 - a1*y_1 - a2*y_2 - a3*y_3 - a4*y_4; // n = 4.
                 break;
             case 5:
-                H[i][REAL]= K*b5 - a1*y_1 - a2*y_2 - a3*y_3 - a4*y_4 - a5*y_5; // Idem
+                H[i][REAL] = K*b5 - a1*y_1 - a2*y_2 - a3*y_3 - a4*y_4 - a5*y_5; // n = 5.
                 break;
             case 6:
-                H[i][REAL]= K*b6 - a1*y_1 - a2*y_2 - a3*y_3 - a4*y_4 - a5*y_5 - a6*y_6; //Idem
+                H[i][REAL] = K*b6 - a1*y_1 - a2*y_2 - a3*y_3 - a4*y_4 - a5*y_5 - a6*y_6; // n = 6.
                 break;
             default:
-                H[i][REAL]= -a1*y_1 - a2*y_2 - a3*y_3 - a4*y_4 - a5*y_5 - a6*y_6; // n > 6
+                H[i][REAL] = -a1*y_1 - a2*y_2 - a3*y_3 - a4*y_4 - a5*y_5 - a6*y_6; // n > 6.
                 break;
             }
-            y_6 = y_5; //Reasignación de salidas anteriores
+            /* Reasignación de salidas anteriores */
+            y_6 = y_5;
             y_5 = y_4;
             y_4 = y_3;
             y_3 = y_2;
@@ -115,14 +83,12 @@ void hn(double K,double a1,double a2,double a3,double a4,double a5,double a6,dou
             y_1 = H[i][REAL];
         }
         else{
-            H[i][REAL]=0;
+            H[i][REAL] = 0;
         }
     }
 }
 
-/**
- * Constructor
- */
+/* Constructor */
 controlVolume::controlVolume(){
     // se inicializan variables para asignar condiciones iniciales
     a=0;b=0;c=0;d=0;
@@ -136,8 +102,6 @@ controlVolume::controlVolume(){
     da=0;db=0;dc=0;dd=0;
     ea=0;eb=0;ec=0;ed=0;
 
-
-
     // variables de energia
     energia31=0;   // variable donde se guarda la cantidad de energia de la senal
     energia64=0;energia125=0;energia250=0;energia500=0;energia1000=0;energia2000=0;
@@ -146,131 +110,124 @@ controlVolume::controlVolume(){
     // variables de temporizacion
     y1=0;y2=0;y3=0;y4=0;y5=0;     //Variable para circuito RC
     y6=0;y7=0;y8=0;y9=0;y10=0;
-
 }
 
-
-/*
- * Destructor
- */
-
+/* Destructor */
 controlVolume::~controlVolume(){
 
 
-
 }
 
 
+/* ------------------------------ Filtro 16 kHz ------------------------------ */
+void controlVolume::filter_16k(int blockSize, int volumeGain, bool inicial, float *in, float *out){
 
-//-------------------------------------------------FILTRO DE 16KHz de orden 2----------------------------------------------------------------///
-void controlVolume::filter(int blockSize, int volumeGain, bool inicial, float *in, float *out){
+    int N = 2048;
 
-        int N = 2048;
+    fftw_complex *x;
+    x = (fftw_complex *)fftw_malloc(sizeof(fftw_complex) * N);
 
-        fftw_complex *x;
-        x = (fftw_complex *)fftw_malloc(sizeof(fftw_complex) * N);
+    fftw_complex *X;
+    X = (fftw_complex *)fftw_malloc(sizeof(fftw_complex) * N);
 
-        fftw_complex *X;
-        X = (fftw_complex *)fftw_malloc(sizeof(fftw_complex) * N);
+    fftw_complex *y;
+    y = (fftw_complex *)fftw_malloc(sizeof(fftw_complex) * N);
 
-        fftw_complex *y;
-        y = (fftw_complex *)fftw_malloc(sizeof(fftw_complex) * N);
+    fftw_complex *Y;
+    Y = (fftw_complex *)fftw_malloc(sizeof(fftw_complex) * N);
 
-        fftw_complex *Y;
-        Y = (fftw_complex *)fftw_malloc(sizeof(fftw_complex) * N);
+    fftw_complex *h16;
+    h16 = (fftw_complex *)fftw_malloc(sizeof(fftw_complex) * N);
 
-        fftw_complex *h10;
-        h10 = (fftw_complex *)fftw_malloc(sizeof(fftw_complex) * N);
+    fftw_complex *H16;
+    H16 = (fftw_complex *)fftw_malloc(sizeof(fftw_complex) * N);
 
-        fftw_complex *H10;
-        H10 = (fftw_complex *)fftw_malloc(sizeof(fftw_complex) * N);
+    double *out_16 = new double[blockSize];
+    double *in_16  = new double[blockSize];
 
-        double *out_10 = new double[blockSize];
-        double *in_10  = new double[blockSize];
+    if (haux16){
+        sol16[300] = {0};
+        haux16 = false;
+    }
 
-        if (haux){
-            sol[300] = {0};
-            haux=false;
+    /* Constantes del filtro */
+    double K=0.07875912;
+    double a1=3.44387319;
+    double a2=5.29844359;
+    double a3=5.13528975;
+    double a4=3.47957963;
+    double a5=1.47740514;
+    double a6=0.28411879;
+    double b1=0.04060383;
+    double b2=-2.91809914;
+    double b3=0;
+    double b4=2.91809914;
+    double b5=-0.04060383;
+    double b6=-1;
+
+    hn(K,a1,a2,a3,a4,a5,a6,b1,b2,b3,b4,b5,b6,h16); // Calcula h(n).
+    fft(h16,H16); // Calcula H(k).
+
+    /* Introduce las últimas 300 muestras de x(n-1). */
+    for(int i=0; i<2048; i++){
+        if (i<300){
+            x[i][REAL]= sol16[i];
+            x[i][IMAG]= 0;
         }
-
-
-
-        double K=0.07875912;
-        double a1=3.44387319;
-        double a2=5.29844359;
-        double a3=5.13528975;
-        double a4=3.47957963;
-        double a5=1.47740514;
-        double a6=0.28411879;
-        double b1=0.04060383;
-        double b2=-2.91809914;
-        double b3=0;
-        double b4=2.91809914;
-        double b5=-0.04060383;
-        double b6=-1;
-
-
-        hn(K,a1,a2,a3,a4,a5,a6,b1,b2,b3,b4,b5,b6,h10);
-        fft(h10,H10); //calcula H[k]
-
-        for(int i=0;i<2048;i++){  // introduce los ultimos 300 del x[n-1]
-            if (i<300){
-                    x[i][REAL]= sol[i];
-                    x[i][IMAG]= 0;
-                }
-
-            else {
-                if(i<1324){
-                        in_10[i-300]=static_cast<double>(in[i-300]);
-                        x[i][REAL] = in_10[i-300];
-                        x[i][IMAG] = 0;
-                   }
-
-                else {
-                    x[i][REAL] = 0;
-                    x[i][IMAG] = 0;
-                }
+        else {
+            if(i<1324){
+                in_16[i-300] = static_cast<double>(in[i-300]);
+                x[i][REAL] = in_16[i-300];
+                x[i][IMAG] = 0;
+            }
+            else{
+                x[i][REAL] = 0;
+                x[i][IMAG] = 0;
             }
         }
+    }
 
-        for(int i=0;i<300;i++){  // rellena con la entrada actual
-            sol[i] = in_10[724 + i];
-        }
+    /* Rellena con entrada actual. */
+    for(int i=0;i<300;i++){
+        sol16[i] = in_16[724 + i];
+    }
 
-        fft(x,X); //calcula X[k]
+    fft(x,X); // Calcula X(k).
 
-        for(int i=0;i<2048;i++){  // Y(k)=H[k]X[k]
-            Y[i][REAL]=H10[i][REAL]*X[i][REAL]-H10[i][IMAG]*X[i][IMAG];
-            Y[i][IMAG]=H10[i][REAL]*X[i][IMAG]+H10[i][IMAG]*X[i][REAL];
-        }
+    /* Cálculo de Y(k) = H(k)X(k). */
+    for(int i=0; i<2048; i++){
+        Y[i][REAL]=H16[i][REAL]*X[i][REAL]-H16[i][IMAG]*X[i][IMAG];
+        Y[i][IMAG]=H16[i][REAL]*X[i][IMAG]+H16[i][IMAG]*X[i][REAL];
+    }
 
-        idft(Y,y);        //calcula y[n]
+    idft(Y,y);  // Calcula y(n).
 
-        for(int n=0;n<1024;++n){
-            out_10[n]= y[n + 299][REAL];
-            out_10[n]=(0.02)*(volumeGain)*(out_10[n]);//filtro de ganancia unitaria en banda pasante, se escala por 0.02 para ajustar la ganancia del slider
-            out[n]=static_cast<float>(out_10[n]);// se hace conversion de double a float
-        }
+    for(int n=0; n<1024; ++n){
+        out_16[n] = y[n + 299][REAL];
+        out_16[n] = (0.02)*(volumeGain)*(out_16[n]); // Banda pasante del filtro se escala por 0.02 para ajustar la ganancia del slider.
+        out[n] = static_cast<float>(out_16[n]); // Conversión de double a float.
+    }
 
-       // energia16000=FFT(blockSize,out_10);//se determina la energia de la banda
+    // energia16000=FFT(blockSize,out_10);//se determina la energia de la banda
 
-        delete out_10;
-        delete in_10;
-        fftw_free(x);
-        fftw_free(X);
-        fftw_free(Y);
-        fftw_free(h10);
-        fftw_free(H10);
+    /* Libera espacio memoria */
+    delete out_16;
+    delete in_16;
+    fftw_free(x);
+    fftw_free(X);
+    fftw_free(Y);
+    fftw_free(h16);
+    fftw_free(H16);
 
-        /*
-        for(int i =0; i<blockSize; i++){
-            out[i] = 0;
-        }
-        */
+    /*
+    for(int i =0; i<blockSize; i++){
+        out[i] = 0;
+    }
+    */
 }
 
 
-//-------------------------------------------------FILTRO DE 8KHz------------------------------------------------------------------------------//
+/* ------------------------------ Filtro 8 kHz ------------------------------ */
 void controlVolume::filter_8k(int blockSize, int volumeGain, bool inicial, float *in, float *out){
 
      int N = 2048;
@@ -304,120 +261,118 @@ void controlVolume::filter_8k(int blockSize, int volumeGain, bool inicial, float
      for(int i=0;i<2048;i++){
          switch (i) {
          case 0:
-             h8[i][REAL] =  -0.004131972221000227016;
-             h8[i][IMAG] =  0;
+             h8[i][REAL] = -0.004131972221000227016;
+             h8[i][IMAG] = 0;
              break;
          case 1:
-             h8[i][REAL] =  0.018860988212350455;
-             h8[i][IMAG] =  0;
+             h8[i][REAL] = 0.018860988212350455;
+             h8[i][IMAG] = 0;
              break;
          case 2:
              h8[i][REAL] = 0.07724184701232166;
-             h8[i][IMAG] =  0;
+             h8[i][IMAG] = 0;
              break;
          case 3:
-             h8[i][REAL] =  0.043525981075392392;
-             h8[i][IMAG] =  0;
+             h8[i][REAL] = 0.043525981075392392;
+             h8[i][IMAG] = 0;
              break;
          case 4:
-             h8[i][REAL] =  -0.10368955092873815;
-             h8[i][IMAG] =  0;
+             h8[i][REAL] = -0.10368955092873815;
+             h8[i][IMAG] = 0;
              break;
          case 5:
-             h8[i][REAL] =  -0.17462974943888687;
-             h8[i][IMAG] =  0;
+             h8[i][REAL] = -0.17462974943888687;
+             h8[i][IMAG] = 0;
              break;
          case 6:
              h8[i][REAL] = -0.026317712854047076;
-             h8[i][IMAG] =  0;
+             h8[i][IMAG] = 0;
              break;
          case 7:
-             h8[i][REAL] =  0.18362657716751676;
-             h8[i][IMAG] =  0;
+             h8[i][REAL] = 0.18362657716751676;
+             h8[i][IMAG] = 0;
              break;
          case 8:
-             h8[i][REAL] =  0.18362657716751676;
-             h8[i][IMAG] =  0;
+             h8[i][REAL] = 0.18362657716751676;
+             h8[i][IMAG] = 0;
              break;
          case 9:
-             h8[i][REAL] =  -0.026317712854047076;
-             h8[i][IMAG] =  0;
+             h8[i][REAL] = -0.026317712854047076;
+             h8[i][IMAG] = 0;
              break;
          case 10:
-             h8[i][REAL] =  -0.17462974943888687;
-             h8[i][IMAG] =  0;
+             h8[i][REAL] = -0.17462974943888687;
+             h8[i][IMAG] = 0;
              break;
-
          case 11:
-             h8[i][REAL] =  -0.10368955092873815;
-             h8[i][IMAG] =  0;
+             h8[i][REAL] = -0.10368955092873815;
+             h8[i][IMAG] = 0;
              break;
          case 12:
-             h8[i][REAL] =  0.043525981075392392;
-             h8[i][IMAG] =  0;
+             h8[i][REAL] = 0.043525981075392392;
+             h8[i][IMAG] = 0;
              break;
          case 13:
-             h8[i][REAL] =  0.07724184701232166;
-             h8[i][IMAG] =  0;
+             h8[i][REAL] = 0.07724184701232166;
+             h8[i][IMAG] = 0;
              break;
          case 14:
-             h8[i][REAL] =  0.018860988212350455;
-             h8[i][IMAG] =  0;
+             h8[i][REAL] = 0.018860988212350455;
+             h8[i][IMAG] = 0;
              break;
          case 15:
-             h8[i][REAL] =  -0.004131972221000227016;
-             h8[i][IMAG] =  0;
+             h8[i][REAL] = -0.004131972221000227016;
+             h8[i][IMAG] = 0;
              break;
 
          default:
-             h8[i][REAL] =  0;
-             h8[i][IMAG] =  0;
+             h8[i][REAL] = 0;
+             h8[i][IMAG] = 0;
              break;
          }
      }
 
-     fft(h8,H8); //calcula H[k]
+     fft(h8,H8); // Calcula H(k).
 
-     for(int i=0;i<2048;i++){  // introduce los ultimos 300 del x[n-1]
-         if (i<14){
-                 x[i][REAL]= sol8[i];
-                 x[i][IMAG]= 0;
-             }
-
-         else {
-             if(i<(1024 +14)){
-                     in_8[i-14]=static_cast<double>(in[i-14]);
-                     x[i][REAL] = in_8[i-14];
-                     x[i][IMAG] = 0;
-                }
-
-             else {
-                 x[i][REAL] = 0;
-                 x[i][IMAG] = 0;
-             }
-         }
+     for(int i=0; i<2048; i++){
+        if (i<14){
+            x[i][REAL] = sol8[i];
+            x[i][IMAG] = 0;
+        }
+        else{
+            if(i<(1024+14)){
+                in_8[i-14] = static_cast<double>(in[i-14]);
+                x[i][REAL] = in_8[i-14];
+                x[i][IMAG] = 0;
+            }
+            else {
+                x[i][REAL] = 0;
+                x[i][IMAG] = 0;
+            }
+        }
      }
 
-     for(int i=0;i < 14;i++){  // rellena con la entrada actual
+     for(int i=0;i < 14;i++){
          sol8[i] = in_8[(1024-14) + i];
      }
 
-     fft(x,X); //calcula X[k]
+     fft(x,X); // Calcula X(k).
 
-     for(int i=0;i<2048;i++){  // Y(k)=H[k]X[k]
+     /* Cálculo de Y(k) = H(k)X(k) */
+     for(int i=0; i<2048; i++){
          Y[i][REAL]=H8[i][REAL]*X[i][REAL]-H8[i][IMAG]*X[i][IMAG];
          Y[i][IMAG]=H8[i][REAL]*X[i][IMAG]+H8[i][IMAG]*X[i][REAL];
      }
 
-     idft(Y,y);        //calcula y[n]
+     idft(Y,y); // Calcula y(n).
 
-     for(int n=0;n<1024;++n){
-         out_8[n]= y[n + 14][REAL];
-         out_8[n]=(0.02)*(volumeGain)*(out_8[n]);//filtro de ganancia unitaria en banda pasante, se escala por 0.02 para ajustar la ganancia del slider
-         out[n]=static_cast<float>(out_8[n]);// se hace conversion de double a float
+     for(int n=0; n<1024; ++n){
+         out_8[n] = y[n + 14][REAL];
+         out_8[n] = (0.02)*(volumeGain)*(out_8[n]); // filtro de ganancia unitaria en banda pasante, se escala por 0.02 para ajustar la ganancia del slider
+         out[n]=static_cast<float>(out_8[n]); // se hace conversion de double a float
      }
 
-    // energia8000=FFT(blockSize,out_8);//se determina la energia de la banda
+     // energia8000=FFT(blockSize,out_8);//se determina la energia de la banda
 
      delete out_8;
      delete in_8;
@@ -435,7 +390,7 @@ void controlVolume::filter_8k(int blockSize, int volumeGain, bool inicial, float
  }
 
 
-//-------------------------------------------------FILTRO DE 4KHz------------------------------------------------------------------------------//
+/* ------------------------------ Filtro 4 kHz ------------------------------ */
 void controlVolume::filter_4k(int blockSize, int volumeGain, bool inicial, float *in, float *out){//filtro de 2kHz
 
     int N = 2048;
@@ -659,7 +614,7 @@ void controlVolume::filter_4k(int blockSize, int volumeGain, bool inicial, float
 }
 
 
-//-------------------------------------------------FILTRO DE 2KHz------------------------------------------------------------------------------//
+/* ------------------------------ Filtro 2 kHz ------------------------------ */
 void controlVolume::filter_2k(int blockSize, int volumeGain, bool inicial, float *in, float *out){//filtro de 2kHz
 
     int N = 2048;
@@ -902,7 +857,8 @@ void controlVolume::filter_2k(int blockSize, int volumeGain, bool inicial, float
     */
 }
 
-//-------------------------------------------------FILTRO DE 1KHz------------------------------------------------------------------------------//
+
+/* ------------------------------ Filtro 1 kHz ------------------------------ */
 void controlVolume::filter_1k(int blockSize, int volumeGain, bool inicial, float *in, float *out){//filtro de 1kHz
 
         int N = 2048;
@@ -1204,7 +1160,8 @@ void controlVolume::filter_1k(int blockSize, int volumeGain, bool inicial, float
         */
 }
 
-//-------------------------------------------------FILTRO DE 500Hz------------------------------------------------------------------------------//
+
+/* ------------------------------ Filtro 500 Hz ------------------------------ */
 void controlVolume::filter_500(int blockSize, int volumeGain, bool inicial, float *in, float *out){
 
     int N = 2048;
@@ -1708,7 +1665,8 @@ void controlVolume::filter_500(int blockSize, int volumeGain, bool inicial, floa
     */
 }
 
-//-------------------------------------------------FILTRO DE 250Hz------------------------------------------------------------------------------//
+
+/* ------------------------------ Filtro 250 Hz ------------------------------ */
 void controlVolume::filter_250(int blockSize, int volumeGain, bool inicial, float *in, float *out){//filtro de 250Hz
 
     int N = 2048;
@@ -2692,7 +2650,8 @@ void controlVolume::filter_250(int blockSize, int volumeGain, bool inicial, floa
     */
 }
 
-//-------------------------------------------------FILTRO DE 125Hz------------------------------------------------------------------------------//
+
+/* ------------------------------ Filtro 125 Hz ------------------------------ */
 void controlVolume::filter_125(int blockSize, int volumeGain, bool inicial, float *in, float *out){//filtro de 150Hz
 
     int N = 2048;
@@ -4015,7 +3974,8 @@ void controlVolume::filter_125(int blockSize, int volumeGain, bool inicial, floa
     */
 }
 
-//-------------------------------------------------FILTRO DE 64Hz------------------------------------------------------------------------------//
+
+/* ------------------------------ Filtro 64 Hz ------------------------------ */
 void controlVolume::filter_63(int blockSize, int volumeGain, bool inicial, float *in, float *out){//filtro de 63Hz
 
     int N = 2048;
@@ -5517,7 +5477,8 @@ void controlVolume::filter_63(int blockSize, int volumeGain, bool inicial, float
 
 }
 
-//--------------------------------------------------FILTRO DE 31.5Hz---------------------------------------------------------------------------//
+
+/* ------------------------------ Filtro 32 Hz ------------------------------ */
 void controlVolume::filter_31_5(int blockSize, int volumeGain, bool inicial, float *in, float *out){
     double s_31=0.01011125550119148;
     double a_0_31=-1.9977179089948256;
@@ -5600,6 +5561,8 @@ void controlVolume::filter_31_5(int blockSize, int volumeGain, bool inicial, flo
       delete out_0;
 }
 
+
+/* ------------------------------ ECUALIZADOR ------------------------------ */
 /**
  * Ecualizador Digital
  * Parametros de entrada:
@@ -5636,7 +5599,7 @@ void controlVolume::eq(int blockSize, int volumeGain, int g1, int g2, int g3, in
 
     // se llama a cada filtro y se pasan los parametroa de ganancia, tama;no de bloque, entrada y salida
     // conexion en paralelo de filtros de ecualizador de 10 bandas
-    filter(blockSize,g10,inicial,in,tmp9);
+    filter_16k(blockSize,g10,inicial,in,tmp9);
 
     filter_8k(blockSize,g9,inicial,in,tmp8);
 
@@ -5773,6 +5736,7 @@ int controlVolume::valorbarra6_(){
     y6=salida;
     return salida;
 }
+
 int controlVolume::valorbarra7_(){
     int salida=0;
     salida=energia2000+0.5*y7;
@@ -5800,5 +5764,3 @@ int controlVolume::valorbarra10_(){
     y10=salida;
     return salida;
 }
-
-//-----------------------------------------------------------------------------------------------------------------------------------------------------
