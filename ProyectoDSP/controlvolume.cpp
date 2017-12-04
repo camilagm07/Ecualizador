@@ -120,65 +120,6 @@ void hn(double K,double a1,double a2,double a3,double a4,double a5,double a6,dou
     }
 }
 
-
-void hn8(double K,double a1,double a2,double a3,double a4,double a5,double a6,double a7,double a8,double b1,double b2,double b3,double b4,double b5,double b6, double b7, double b8, double H[2048][2]){
-
-
-    float y_1=0, y_2=0, y_3=0, y_4=0, y_5=0, y_6=0, y_7=0, y_8=0; //Se inician las condiciones iniciales
-    for(int i=0; i<2048; i++){
-        H[i][IMAG] = 0;
-        if(i<300){
-            switch(i){
-            case 0:
-                H[i][REAL]= K; //k=0;
-                break;
-            case 1:
-                H[i][REAL]= K*b1 - a1*y_1; //k=1;
-                break;
-            case 2:
-                H[i][REAL]= K*b2 - a1*y_1 - a2*y_2; //k=2;
-                break;
-            case 3:
-                H[i][REAL]= K*b3 - a1*y_1 - a2*y_2 - a3*y_3; //k=3;
-                break;
-            case 4:
-                H[i][REAL]= K*b4 - a1*y_1 - a2*y_2 - a3*y_3 - a4*y_4; //k=4;
-                break;
-            case 5:
-                H[i][REAL]= K*b5 - a1*y_1 - a2*y_2 - a3*y_3 - a4*y_4 - a5*y_5; //k=5;
-                break;
-            case 6:
-                H[i][REAL]= K*b6 - a1*y_1 - a2*y_2 - a3*y_3 - a4*y_4 - a5*y_5 - a6*y_6; //k=6;
-                break;
-            case 7:
-                H[i][REAL]= K*b7 - a1*y_1 - a2*y_2 - a3*y_3 - a4*y_4 - a5*y_5 - a6*y_6 - a7*y_7; //k=7;
-                break;
-            case 8:
-                H[i][REAL]= K*b8 - a1*y_1 - a2*y_2 - a3*y_3 - a4*y_4 - a5*y_5 - a6*y_6 - a7*y_7 - a8*y_8; //k=8;
-                break;
-            default:
-                H[i][REAL]= -a1*y_1 - a2*y_2 - a3*y_3 - a4*y_4 - a5*y_5 - a6*y_6 - a7*y_7 - a8*y_8; //Después de k=8 hasta k=300;
-                break;
-            }
-
-            // Se actualizan las condiciones iniciales
-            y_8 = y_7;
-            y_7 = y_6;
-            y_6 = y_5;
-            y_5 = y_4;
-            y_4 = y_3;
-            y_3 = y_2;
-            y_2 = y_1;
-            y_1 = H[i][REAL];
-        }
-        else{
-            H[i][REAL]=0;
-
-        }
-    }
-
-}
-
 /**
  * Constructor
  */
@@ -357,6 +298,168 @@ void controlVolume::filter(int blockSize, int volumeGain, bool inicial, float *i
  * puntero entrada
  * puntero salida
  */
+
+ //-------------------------------------------------FILTRO DE 8KHz------------------------------------------------------------------------------//
+ void controlVolume::filter_8k(int blockSize, int volumeGain, bool inicial, float *in, float *out){
+
+     int N = 2048;
+
+     fftw_complex *x_n;   // se defini puntero para salida de tipo FFT complejo (dos columnas: parte real y parte imaginaria)
+     x_n = (fftw_complex *)fftw_malloc(sizeof(fftw_complex) * N); // Se definie el tamano del puntero de salida
+
+     fftw_complex *X;   // se defini puntero para salida de tipo FFT complejo (dos columnas: parte real y parte imaginaria)
+     X = (fftw_complex *)fftw_malloc(sizeof(fftw_complex) * N); // Se definie el tamano del puntero de salida
+
+     fftw_complex *y;   // se defini puntero para salida de tipo FFT complejo (dos columnas: parte real y parte imaginaria)
+     y = (fftw_complex *)fftw_malloc(sizeof(fftw_complex) * N); // Se definie el tamano del puntero de salida
+
+     fftw_complex *Y;   // se defini puntero para salida de tipo FFT complejo (dos columnas: parte real y parte imaginaria)
+     Y = (fftw_complex *)fftw_malloc(sizeof(fftw_complex) * N); // Se definie el tamano del puntero de salida
+
+     fftw_complex *h8;   // se definiti puntero para salida de tipo FFT complejo (dos columnas: parte real y parte imaginaria)
+     h8 = (fftw_complex *)fftw_malloc(sizeof(fftw_complex) * N); // Se definie el tamano del puntero de salida
+
+     fftw_complex *H8;   // se definiti puntero para salida de tipo FFT complejo (dos columnas: parte real y parte imaginaria)
+     H8 = (fftw_complex *)fftw_malloc(sizeof(fftw_complex) * N); // Se definie el tamano del puntero de salida
+
+     double *out_8 = new double[blockSize];
+     double *in_8  = new double[blockSize];
+
+     if (haux8){    //calcula el h[n] una sola vez a partir de los coeficientes de la ecuacion de diferencias
+         sol8[14] = {0};
+         haux8=false;
+     }
+
+     for(int i=0;i<2048;i++){
+         switch (i) {
+         case 0:
+             h8[i][REAL] =  -0.004131972221000227016;
+             h8[i][IMAG] =  0;
+             break;
+         case 1:
+             h8[i][REAL] =  0.018860988212350455;
+             h8[i][IMAG] =  0;
+             break;
+         case 2:
+             h8[i][REAL] = 0.07724184701232166;
+             h8[i][IMAG] =  0;
+             break;
+         case 3:
+             h8[i][REAL] =  0.043525981075392392;
+             h8[i][IMAG] =  0;
+             break;
+         case 4:
+             h8[i][REAL] =  -0.10368955092873815;
+             h8[i][IMAG] =  0;
+             break;
+         case 5:
+             h8[i][REAL] =  -0.17462974943888687;
+             h8[i][IMAG] =  0;
+             break;
+         case 6:
+             h8[i][REAL] = -0.026317712854047076;
+             h8[i][IMAG] =  0;
+             break;
+         case 7:
+             h8[i][REAL] =  0.18362657716751676;
+             h8[i][IMAG] =  0;
+             break;
+         case 8:
+             h8[i][REAL] =  0.18362657716751676;
+             h8[i][IMAG] =  0;
+             break;
+         case 9:
+             h8[i][REAL] =  -0.026317712854047076;
+             h8[i][IMAG] =  0;
+             break;
+         case 10:
+             h8[i][REAL] =  -0.17462974943888687;
+             h8[i][IMAG] =  0;
+             break;
+
+         case 11:
+             h8[i][REAL] =  -0.10368955092873815;
+             h8[i][IMAG] =  0;
+             break;
+         case 12:
+             h8[i][REAL] =  0.043525981075392392;
+             h8[i][IMAG] =  0;
+             break;
+         case 13:
+             h8[i][REAL] =  0.07724184701232166;
+             h8[i][IMAG] =  0;
+             break;
+         case 14:
+             h8[i][REAL] =  0.018860988212350455;
+             h8[i][IMAG] =  0;
+             break;
+         case 15:
+             h8[i][REAL] =  -0.004131972221000227016;
+             h8[i][IMAG] =  0;
+             break;
+
+         default:
+             h8[i][REAL] =  0;
+             h8[i][IMAG] =  0;
+             break;
+         }
+     }
+
+     fft(h8,H8); //calcula H[k]
+
+     for(int i=0;i<2048;i++){  // introduce los ultimos 300 del x[n-1]
+         if (i<14){
+                 x_n[i][REAL]= sol8[i];
+                 x_n[i][IMAG]= 0;
+             }
+
+         else {
+             if(i<(1024 +14)){
+                     in_8[i-14]=static_cast<double>(in[i-14]);
+                     x_n[i][REAL] = in_8[i-14];
+                     x_n[i][IMAG] = 0;
+                }
+
+             else {
+                 x_n[i][REAL] = 0;
+                 x_n[i][IMAG] = 0;
+             }
+         }
+     }
+
+     for(int i=0;i < 14;i++){  // rellena con la entrada actual
+         sol8[i] = in_8[(1024-14) + i];
+     }
+
+     fft(x_n,X); //calcula X[k]
+
+     for(int i=0;i<2048;i++){  // Y(k)=H[k]X[k]
+         Y[i][REAL]=H8[i][REAL]*X[i][REAL]-H8[i][IMAG]*X[i][IMAG];
+         Y[i][IMAG]=H8[i][REAL]*X[i][IMAG]+H8[i][IMAG]*X[i][REAL];
+     }
+
+     idft(Y,y);        //calcula y[n]
+
+     for(int n=0;n<1024;++n){
+         out_8[n]= y[n + 14][REAL];
+         out_8[n]=(0.02)*(volumeGain)*(out_8[n]);//filtro de ganancia unitaria en banda pasante, se escala por 0.02 para ajustar la ganancia del slider
+         out[n]=static_cast<float>(out_8[n]);// se hace conversion de double a float
+     }
+
+ //    energia8000=FFT(blockSize,out_8);//se determina la energia de la banda
+
+     delete out_8;
+     delete in_8;
+     fftw_free(x_n);
+     fftw_free(X);
+     fftw_free(Y);
+     fftw_free(h8);
+     fftw_free(H8);
+ }
+
+
+
+ /*
 //-------------------------------------------------FILTRO DE 8KHz------------------------------------------------------------------------------//
 void controlVolume::filter_8k(int blockSize, int volumeGain, bool inicial, float *in, float *out){
     // constantes del filtro, definidas como tipo double
@@ -445,6 +548,226 @@ void controlVolume::filter_8k(int blockSize, int volumeGain, bool inicial, float
       delete zz;
       delete out_8;
 }
+
+*/
+
+//-------------------------------------------------FILTRO DE 4KHz------------------------------------------------------------------------------//
+void controlVolume::filter_4k(int blockSize, int volumeGain, bool inicial, float *in, float *out){//filtro de 2kHz
+    int N = 2048;
+
+    fftw_complex *x_n;   // se defini puntero para salida de tipo FFT complejo (dos columnas: parte real y parte imaginaria)
+    x_n = (fftw_complex *)fftw_malloc(sizeof(fftw_complex) * N); // Se definie el tamano del puntero de salida
+
+    fftw_complex *X;   // se defini puntero para salida de tipo FFT complejo (dos columnas: parte real y parte imaginaria)
+    X = (fftw_complex *)fftw_malloc(sizeof(fftw_complex) * N); // Se definie el tamano del puntero de salida
+
+    fftw_complex *y;   // se defini puntero para salida de tipo FFT complejo (dos columnas: parte real y parte imaginaria)
+    y = (fftw_complex *)fftw_malloc(sizeof(fftw_complex) * N); // Se definie el tamano del puntero de salida
+
+    fftw_complex *Y;   // se defini puntero para salida de tipo FFT complejo (dos columnas: parte real y parte imaginaria)
+    Y = (fftw_complex *)fftw_malloc(sizeof(fftw_complex) * N); // Se definie el tamano del puntero de salida
+
+    fftw_complex *h4;   // se definiti puntero para salida de tipo FFT complejo (dos columnas: parte real y parte imaginaria)
+    h4 = (fftw_complex *)fftw_malloc(sizeof(fftw_complex) * N); // Se definie el tamano del puntero de salida
+
+    fftw_complex *H4;   // se definiti puntero para salida de tipo FFT complejo (dos columnas: parte real y parte imaginaria)
+    H4 = (fftw_complex *)fftw_malloc(sizeof(fftw_complex) * N); // Se definie el tamano del puntero de salida
+
+    double *out_4 = new double[blockSize];
+    double *in_4  = new double[blockSize];
+
+    if (haux4){    //calcula el h[n] una sola vez a partir de los coeficientes de la ecuacion de diferencias
+        sol4[30] = {0};
+        haux4=false;
+    }
+
+    for(int i=0;i<2048;i++){
+        switch (i) {
+        case 0:
+            h4[i][REAL] =  -0.004006833477669;
+            h4[i][IMAG] =  0;
+            break;
+        case 1:
+            h4[i][REAL] =  -0.006966907948778;
+            h4[i][IMAG] =  0;
+            break;
+        case 2:
+            h4[i][REAL] = -0.000081447279846;
+            h4[i][IMAG] =  0;
+            break;
+        case 3:
+            h4[i][REAL] =  0.016899788357053;
+            h4[i][IMAG] =  0;
+            break;
+        case 4:
+            h4[i][REAL] =   0.036758700596718;
+            h4[i][IMAG] =  0;
+            break;
+        case 5:
+            h4[i][REAL] =   0.047570718829542;
+            h4[i][IMAG] =  0;
+            break;
+        case 6:
+            h4[i][REAL] =  0.038900469575622;
+            h4[i][IMAG] =  0;
+            break;
+        case 7:
+            h4[i][REAL] =  0.008325708765166;
+            h4[i][IMAG] =  0;
+            break;
+        case 8:
+            h4[i][REAL] =  -0.035398535410993;
+            h4[i][IMAG] =  0;
+            break;
+        case 9:
+            h4[i][REAL] =  -0.074781635551810;
+            h4[i][IMAG] =  0;
+            break;
+        case 10:
+            h4[i][REAL] =  -0.091057430123658;
+            h4[i][IMAG] =  0;
+            break;
+
+        case 11:
+            h4[i][REAL] =  -0.073304794560737;
+            h4[i][IMAG] =  0;
+            break;
+        case 12:
+            h4[i][REAL] =  -0.024679936892059;
+            h4[i][IMAG] =  0;
+            break;
+        case 13:
+            h4[i][REAL] =  0.037653168801664;
+            h4[i][IMAG] =  0;
+            break;
+        case 14:
+            h4[i][REAL] =  0.089315840237288;
+            h4[i][IMAG] =  0;
+            break;
+        case 15:
+            h4[i][REAL] =  0.109287718669758;
+            h4[i][IMAG] =  0;
+            break;
+        case 16:
+                h4[i][REAL] =  0.089315840237288;
+                h4[i][IMAG] =  0;
+                break;
+        case 17:
+                h4[i][REAL] =  0.037653168801664;
+                h4[i][IMAG] =  0;
+                break;
+        case 18:
+                h4[i][REAL] =  -0.024679936892059;
+                h4[i][IMAG] =  0;
+                break;
+        case 19:
+                h4[i][REAL] =  -0.073304794560737;
+                h4[i][IMAG] =  0;
+                break;
+        case 20:
+                h4[i][REAL] =  -0.091057430123658;
+                h4[i][IMAG] =  0;
+                break;
+        case 21:
+                h4[i][REAL] =  -0.074781635551810;
+                h4[i][IMAG] =  0;
+                break;
+        case 22:
+                h4[i][REAL] =  -0.035398535410993;
+                h4[i][IMAG] =  0;
+                break;
+        case 23:
+                h4[i][REAL] =  0.008325708765166;
+                h4[i][IMAG] =  0;
+                break;
+        case 24:
+                h4[i][REAL] =  0.038900469575622;
+                h4[i][IMAG] =  0;
+                break;
+        case 25:
+                h4[i][REAL] =  0.047570718829542;
+                h4[i][IMAG] =  0;
+                  break;
+        case 26:
+                h4[i][REAL] =  0.036758700596718;
+                h4[i][IMAG] =  0;
+                break;
+        case 27:
+                h4[i][REAL] =  0.016899788357053;
+                h4[i][IMAG] =  0;
+                break;
+        case 28:
+                h4[i][REAL] =  -0.000081447279846;
+                h4[i][IMAG] =  0;
+                break;
+        case 29:
+                h4[i][REAL] =  -0.006966907948778;
+                h4[i][IMAG] =  0;
+                break;
+        case 30:
+                h4[i][REAL] =  -0.004006833477669;
+                h4[i][IMAG] =  0;
+                break;
+        default:
+            h4[i][REAL] =  0;
+            h4[i][IMAG] =  0;
+            break;
+        }
+    }
+
+    fft(h4,H4); //calcula H[k]
+
+    for(int i=0;i<2048;i++){  // introduce los ultimos 300 del x[n-1]
+        if (i<29){
+                x_n[i][REAL]= sol4[i];
+                x_n[i][IMAG]= 0;
+            }
+
+        else {
+            if(i<(1024 +29)){
+                    in_4[i-29]=static_cast<double>(in[i-29]);
+                    x_n[i][REAL] = in_4[i-29];
+                    x_n[i][IMAG] = 0;
+               }
+
+            else {
+                x_n[i][REAL] = 0;
+                x_n[i][IMAG] = 0;
+            }
+        }
+    }
+
+    for(int i=0;i < 29;i++){  // rellena con la entrada actual
+        sol4[i] = in_4[(1024-29) + i];
+    }
+
+    fft(x_n,X); //calcula X[k]
+
+    for(int i=0;i<2048;i++){  // Y(k)=H[k]X[k]
+        Y[i][REAL]=H4[i][REAL]*X[i][REAL]-H4[i][IMAG]*X[i][IMAG];
+        Y[i][IMAG]=H4[i][REAL]*X[i][IMAG]+H4[i][IMAG]*X[i][REAL];
+    }
+
+    idft(Y,y);        //calcula y[n]
+
+    for(int n=0;n<1024;++n){
+        out_4[n]= y[n + 29][REAL];
+        out_4[n]=(0.02)*(volumeGain)*(out_4[n]);//filtro de ganancia unitaria en banda pasante, se escala por 0.02 para ajustar la ganancia del slider
+        out[n]=static_cast<float>(out_4[n]);// se hace conversion de double a float
+    }
+
+//    energia4000=FFT(blockSize,out_4);//se determina la energia de la banda
+
+    delete out_4;
+    delete in_4;
+    fftw_free(x_n);
+    fftw_free(X);
+    fftw_free(Y);
+    fftw_free(h4);
+    fftw_free(H4);
+}
+
+/*
 //-------------------------------------------------FILTRO DE 4KHz------------------------------------------------------------------------------//
 void controlVolume::filter_4k(int blockSize, int volumeGain, bool inicial, float *in, float *out){//filtro de 2kHz
     double s_4=0.17985538768214201;
@@ -527,6 +850,10 @@ void controlVolume::filter_4k(int blockSize, int volumeGain, bool inicial, float
       delete xx;
       delete out_7;
 }
+
+*/
+
+
 //-------------------------------------------------FILTRO DE 1KHz------------------------------------------------------------------------------//
 void controlVolume::filter_1k(int blockSize, int volumeGain, bool inicial, float *in, float *out){//filtro de 1kHz
     double s_1=0.049540165073682967;
@@ -1310,7 +1637,3 @@ int controlVolume::valorbarra10_(){
 }
 
 //-----------------------------------------------------------------------------------------------------------------------------------------------------
-
-
-
-

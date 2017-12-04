@@ -153,6 +153,13 @@ public:
 
    bool haux = true;
    double sol[300];
+
+   bool haux8 = true;
+   double sol8[15];
+
+   bool haux4 = true;
+   double sol4[30];
+
 };
 
 
