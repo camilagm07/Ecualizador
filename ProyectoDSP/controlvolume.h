@@ -160,6 +160,9 @@ public:
    bool haux4 = true;
    double sol4[30];
 
+   bool haux2 = true;
+   double sol2[35];
+
 };
 
 
