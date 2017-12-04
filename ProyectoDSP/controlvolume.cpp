@@ -20,7 +20,7 @@
 #define REAL 0
 #define IMAG 1
 
-/* Cálculo DFT */
+/* Función necesaria para el Cálculo DFT */
 void fft(double ent[2048][2], double sal[2048][2]){
     fftw_plan planfft = fftw_plan_dft_1d(2048, ent, sal, FFTW_FORWARD, FFTW_ESTIMATE);
     fftw_execute(planfft);
@@ -28,24 +28,28 @@ void fft(double ent[2048][2], double sal[2048][2]){
     fftw_cleanup();
 }
 
-/* Cálculo IDFT */
+/* Función necesaria para el Cálculo IDFT */
 void idft(double ent[2048][2],double sal[2048][2]){
     fftw_plan planidft = fftw_plan_dft_1d(2048, ent , sal, FFTW_BACKWARD, FFTW_ESTIMATE);
     fftw_execute(planidft);
     fftw_destroy_plan(planidft);
     fftw_cleanup();
 
-    for (int i=0; i<2048; i++){ // Normalización.
-        sal[i][REAL] /= 2048;
+    for (int i=0; i<2048; i++){ // La función que calcula la IDFT no incluye el 1/n de 1/n*Wn*Yk
+        sal[i][REAL] /= 2048;  //Este for lo utilizamos para la normalización 1/n
         sal[i][IMAG] /= 2048;
     }
 }
 
+
+/*En el caso de los filtros IIR la respuesta al impulso está dada por una combinación de entradas y salidas anteriores
+La siguiente función corresponde al cálculo de h(n) para un filtro IIR de orden 6*/
 /* Cálculo de respuesta al impulso */
 void hn(double K, double a1, double a2, double a3, double a4, double a5, double a6, double b1, double b2, double b3, double b4, double b5, double b6, double H[2048][2]){
     float y_1 = 0, y_2 = 0, y_3 = 0, y_4 = 0, y_5 = 0, y_6 = 0; // Inicialización Condiciones iniciales.
 
-    for(int i=0; i<2048; i++){
+    for(int i=0; i<2048; i++){ //Llega a 2048 porque este es el tamaño de la muestra enviada a fft
+
         H[i][IMAG] = 0;
         if(i<300){
             switch(i){
@@ -118,30 +122,34 @@ controlVolume::~controlVolume(){
 
 }
 
-
 /* ------------------------------ Filtro 16 kHz ------------------------------ */
 void controlVolume::filter_16k(int blockSize, int volumeGain, bool inicial, float *in, float *out){
 
-    int N = 2048;
+    /*
+
+    int tamano = 2048;
+
+    //Aquí se crean los punteros de tipo fft_complex para y,yk,x,xk, h y hk.
 
     fftw_complex *x;
-    x = (fftw_complex *)fftw_malloc(sizeof(fftw_complex) * N);
+    x = (fftw_complex *)fftw_malloc(sizeof(fftw_complex) *tamano);
 
     fftw_complex *X;
-    X = (fftw_complex *)fftw_malloc(sizeof(fftw_complex) * N);
+    X = (fftw_complex *)fftw_malloc(sizeof(fftw_complex) *tamano);
 
     fftw_complex *y;
-    y = (fftw_complex *)fftw_malloc(sizeof(fftw_complex) * N);
+    y = (fftw_complex *)fftw_malloc(sizeof(fftw_complex) *tamano);
 
     fftw_complex *Y;
-    Y = (fftw_complex *)fftw_malloc(sizeof(fftw_complex) * N);
+    Y = (fftw_complex *)fftw_malloc(sizeof(fftw_complex) *tamano);
 
     fftw_complex *h16;
-    h16 = (fftw_complex *)fftw_malloc(sizeof(fftw_complex) * N);
+    h16 = (fftw_complex *)fftw_malloc(sizeof(fftw_complex) *tamano);
 
     fftw_complex *H16;
-    H16 = (fftw_complex *)fftw_malloc(sizeof(fftw_complex) * N);
+    H16 = (fftw_complex *)fftw_malloc(sizeof(fftw_complex) *tamano);
 
+    //Se crean punteros auxiliares de entrada y salida con tamaño 1024 que es el tamaño de las muestras x(n)
     double *out_16 = new double[blockSize];
     double *in_16  = new double[blockSize];
 
@@ -150,7 +158,9 @@ void controlVolume::filter_16k(int blockSize, int volumeGain, bool inicial, floa
         haux16 = false;
     }
 
-    /* Constantes del filtro */
+
+
+    // Constantes del filtro
     double K=0.07875912;
     double a1=3.44387319;
     double a2=5.29844359;
@@ -168,8 +178,12 @@ void controlVolume::filter_16k(int blockSize, int volumeGain, bool inicial, floa
     hn(K,a1,a2,a3,a4,a5,a6,b1,b2,b3,b4,b5,b6,h16); // Calcula h(n).
     fft(h16,H16); // Calcula H(k).
 
-    /* Introduce las últimas 300 muestras de x(n-1). */
-    for(int i=0; i<2048; i++){
+
+
+    //CALCULO SOLAPAMIENTO Y ALMACENAMIENTO
+    // Introduce las últimas 300 muestras de x(n-1).
+    for(int i=0; i<2048; i++){ //Llega a 2048 porque este es el tamaño de la muestra enviada a fft
+
         if (i<300){
             x[i][REAL]= sol16[i];
             x[i][IMAG]= 0;
@@ -187,15 +201,16 @@ void controlVolume::filter_16k(int blockSize, int volumeGain, bool inicial, floa
         }
     }
 
-    /* Rellena con entrada actual. */
+    // Rellena con entrada actual.
     for(int i=0;i<300;i++){
         sol16[i] = in_16[724 + i];
     }
 
     fft(x,X); // Calcula X(k).
 
-    /* Cálculo de Y(k) = H(k)X(k). */
-    for(int i=0; i<2048; i++){
+    // Cálculo de Y(k) = H(k)X(k). //
+    for(int i=0; i<2048; i++){ //Llega a 2048 porque este es el tamaño de la muestra enviada a fft
+
         Y[i][REAL]=H16[i][REAL]*X[i][REAL]-H16[i][IMAG]*X[i][IMAG];
         Y[i][IMAG]=H16[i][REAL]*X[i][IMAG]+H16[i][IMAG]*X[i][REAL];
     }
@@ -205,12 +220,12 @@ void controlVolume::filter_16k(int blockSize, int volumeGain, bool inicial, floa
     for(int n=0; n<1024; ++n){
         out_16[n] = y[n + 299][REAL];
         out_16[n] = (0.02)*(volumeGain)*(out_16[n]); // Banda pasante del filtro se escala por 0.02 para ajustar la ganancia del slider.
-        out[n] = static_cast<float>(out_16[n]); // Conversión de double a float.
+        out[n] = static_cast<float>(out_16[n]); // Conversión de double a float. Se obtiene la salida.
     }
 
     // energia16000=FFT(blockSize,out_10);//se determina la energia de la banda
 
-    /* Libera espacio memoria */
+    // Libera espacio memoria //
     delete out_16;
     delete in_16;
     fftw_free(x);
@@ -219,37 +234,40 @@ void controlVolume::filter_16k(int blockSize, int volumeGain, bool inicial, floa
     fftw_free(h16);
     fftw_free(H16);
 
-    /*
+    */
     for(int i =0; i<blockSize; i++){
         out[i] = 0;
     }
-    */
+
 }
 
 
 /* ------------------------------ Filtro 8 kHz ------------------------------ */
 void controlVolume::filter_8k(int blockSize, int volumeGain, bool inicial, float *in, float *out){
+   /*
+     int tamano = 2048;
 
-     int N = 2048;
+     //Aquí se crean los punteros de tipo fft_complex para y,yk,x,xk, h y hk.
 
      fftw_complex *x;
-     x = (fftw_complex *)fftw_malloc(sizeof(fftw_complex) * N);
+     x = (fftw_complex *)fftw_malloc(sizeof(fftw_complex) *tamano);
 
      fftw_complex *X;
-     X = (fftw_complex *)fftw_malloc(sizeof(fftw_complex) * N);
+     X = (fftw_complex *)fftw_malloc(sizeof(fftw_complex) *tamano);
 
      fftw_complex *y;
-     y = (fftw_complex *)fftw_malloc(sizeof(fftw_complex) * N);
+     y = (fftw_complex *)fftw_malloc(sizeof(fftw_complex) *tamano);
 
      fftw_complex *Y;
-     Y = (fftw_complex *)fftw_malloc(sizeof(fftw_complex) * N);
+     Y = (fftw_complex *)fftw_malloc(sizeof(fftw_complex) *tamano);
 
      fftw_complex *h8;
-     h8 = (fftw_complex *)fftw_malloc(sizeof(fftw_complex) * N);
+     h8 = (fftw_complex *)fftw_malloc(sizeof(fftw_complex) *tamano);
 
      fftw_complex *H8;
-     H8 = (fftw_complex *)fftw_malloc(sizeof(fftw_complex) * N);
+     H8 = (fftw_complex *)fftw_malloc(sizeof(fftw_complex) *tamano);
 
+ //Se crean punteros auxiliares de entrada y salida con tamaño 1024 que es el tamaño de las muestras x(n)
      double *out_8 = new double[blockSize];
      double *in_8  = new double[blockSize];
 
@@ -258,8 +276,9 @@ void controlVolume::filter_8k(int blockSize, int volumeGain, bool inicial, float
          haux8=false;
      }
 
+     //Ciclo para cálculo de h(n) asignando a las primeras 14 muestras el valor de las constantes y después de eso rellenando con ceros hasta 2048 que es el tamaño que se envia a la fft
      for(int i=0;i<2048;i++){
-         switch (i) {
+          switch (i){
          case 0:
              h8[i][REAL] = -0.004131972221000227016;
              h8[i][IMAG] = 0;
@@ -334,7 +353,7 @@ void controlVolume::filter_8k(int blockSize, int volumeGain, bool inicial, float
 
      fft(h8,H8); // Calcula H(k).
 
-     for(int i=0; i<2048; i++){
+     for(int i=0; i<2048; i++){ //Llega a 2048 porque este es el tamaño de la muestra enviada a fft
         if (i<14){
             x[i][REAL] = sol8[i];
             x[i][IMAG] = 0;
@@ -358,8 +377,9 @@ void controlVolume::filter_8k(int blockSize, int volumeGain, bool inicial, float
 
      fft(x,X); // Calcula X(k).
 
-     /* Cálculo de Y(k) = H(k)X(k) */
-     for(int i=0; i<2048; i++){
+     // Cálculo de Y(k) = H(k)X(k)
+     for(int i=0; i<2048; i++){ //Llega a 2048 porque este es el tamaño de la muestra enviada a fft
+
          Y[i][REAL]=H8[i][REAL]*X[i][REAL]-H8[i][IMAG]*X[i][IMAG];
          Y[i][IMAG]=H8[i][REAL]*X[i][IMAG]+H8[i][IMAG]*X[i][REAL];
      }
@@ -382,37 +402,44 @@ void controlVolume::filter_8k(int blockSize, int volumeGain, bool inicial, float
      fftw_free(h8);
      fftw_free(H8);
 
-     /*
+     */
      for(int i =0; i<blockSize; i++){
          out[i] = 0;
      }
-    */
+
  }
 
 
 /* ------------------------------ Filtro 4 kHz ------------------------------ */
 void controlVolume::filter_4k(int blockSize, int volumeGain, bool inicial, float *in, float *out){//filtro de 2kHz
 
-    int N = 2048;
+    /*
+    int tamano = 2048;
+
+    //Aquí se crean los punteros de tipo fft_complex para y,yk,x,xk, h y hk.
+
 
     fftw_complex *x;
-    x = (fftw_complex *)fftw_malloc(sizeof(fftw_complex) * N);
+    x = (fftw_complex *)fftw_malloc(sizeof(fftw_complex) *tamano);
 
     fftw_complex *X;
-    X = (fftw_complex *)fftw_malloc(sizeof(fftw_complex) * N);
+    X = (fftw_complex *)fftw_malloc(sizeof(fftw_complex) *tamano);
 
     fftw_complex *y;
-    y = (fftw_complex *)fftw_malloc(sizeof(fftw_complex) * N);
+    y = (fftw_complex *)fftw_malloc(sizeof(fftw_complex) *tamano);
 
     fftw_complex *Y;
-    Y = (fftw_complex *)fftw_malloc(sizeof(fftw_complex) * N);
+    Y = (fftw_complex *)fftw_malloc(sizeof(fftw_complex) *tamano);
 
     fftw_complex *h4;
-    h4 = (fftw_complex *)fftw_malloc(sizeof(fftw_complex) * N);
+    h4 = (fftw_complex *)fftw_malloc(sizeof(fftw_complex) *tamano);
 
     fftw_complex *H4;
-    H4 = (fftw_complex *)fftw_malloc(sizeof(fftw_complex) * N);
+    H4 = (fftw_complex *)fftw_malloc(sizeof(fftw_complex) *tamano);
 
+
+
+  //Se crean punteros auxiliares de entrada y salida con tamaño 1024 que es el tamaño de las muestras x(n)
     double *out_4 = new double[blockSize];
     double *in_4  = new double[blockSize];
 
@@ -421,6 +448,7 @@ void controlVolume::filter_4k(int blockSize, int volumeGain, bool inicial, float
         haux4=false;
     }
 
+    //Ciclo para cálculo de h(n) asignando a las primeras 30 muestras el valor de las constantes y después de eso rellenando con ceros hasta 2048 que es el tamaño que se envia a la fft
     for(int i=0;i<2048;i++){
         switch (i) {
         case 0:
@@ -520,7 +548,7 @@ void controlVolume::filter_4k(int blockSize, int volumeGain, bool inicial, float
                 h4[i][REAL] =  0.008325708765166;
                 h4[i][IMAG] =  0;
                 break;
-        case 24:
+        case switch (i) 24:
                 h4[i][REAL] =  0.038900469575622;
                 h4[i][IMAG] =  0;
                 break;
@@ -545,7 +573,7 @@ void controlVolume::filter_4k(int blockSize, int volumeGain, bool inicial, float
                 h4[i][IMAG] =  0;
                 break;
         case 30:
-                h4[i][REAL] =  -0.004006833477669;
+             switch (i)    h4[i][REAL] =  -0.004006833477669;
                 h4[i][IMAG] =  0;
                 break;
         default:
@@ -563,7 +591,7 @@ void controlVolume::filter_4k(int blockSize, int volumeGain, bool inicial, float
                 x[i][IMAG]= 0;
             }
 
-        else {
+        else switch (i) {
             if(i<(1024 +29)){
                     in_4[i-29]=static_cast<double>(in[i-29]);
                     x[i][REAL] = in_4[i-29];
@@ -598,7 +626,7 @@ void controlVolume::filter_4k(int blockSize, int volumeGain, bool inicial, float
 
     //energia4000=FFT(blockSize,out_4);//se determina la energia de la banda
 
-    delete out_4;
+    delete o switch (i)ut_4;
     delete in_4;
     fftw_free(x);
     fftw_free(X);
@@ -606,37 +634,41 @@ void controlVolume::filter_4k(int blockSize, int volumeGain, bool inicial, float
     fftw_free(h4);
     fftw_free(H4);
 
-    /*
+    */
     for(int i =0; i<blockSize; i++){
         out[i] = 0;
     }
-    */
+
 }
 
 
 /* ------------------------------ Filtro 2 kHz ------------------------------ */
 void controlVolume::filter_2k(int blockSize, int volumeGain, bool inicial, float *in, float *out){//filtro de 2kHz
 
-    int N = 2048;
+    /* int tamano = 2048;
+
+    //Aquí se crean los punteros de tipo fft_complex para y,yk,x,xk, h y hk.
+
 
     fftw_complex *x;
-    x = (fftw_complex *)fftw_malloc(sizeof(fftw_complex) * N);
+    x = (fftw_complex *)fftw_malloc(sizeof(fftw_complex) *tamano);
 
     fftw_complex *X;
-    X = (fftw_complex *)fftw_malloc(sizeof(fftw_complex) * N);
+    X = (fftw_complex *)fftw_malloc(sizeof(fftw_complex) *tamano);
 
     fftw_complex *y;
-    y = (fftw_complex *)fftw_malloc(sizeof(fftw_complex) * N);
+    y = (fftw_complex *)fftw_malloc(sizeof(fftw_complex) *tamano);
 
     fftw_complex *Y;
-    Y = (fftw_complex *)fftw_malloc(sizeof(fftw_complex) * N);
+    Y = (fftw_complex *)fftw_malloc(sizeof(fftw_complex) *tamano);
 
     fftw_complex *h2;
-    h2 = (fftw_complex *)fftw_malloc(sizeof(fftw_complex) * N);
+    h2 = (fftw_complex *)fftw_malloc(sizeof(fftw_complex) *tamano);
 
     fftw_complex *H2;
-    H2 = (fftw_complex *)fftw_malloc(sizeof(fftw_complex) * N);
+    H2 = (fftw_complex *)fftw_malloc(sizeof(fftw_complex) *tamano);
 
+     //Se crean punteros auxiliares de entrada y salida con tamaño 1024 que es el tamaño de las muestras x(n)
     double *out_2 = new double[blockSize];
     double *in_2  = new double[blockSize];
 
@@ -645,6 +677,7 @@ void controlVolume::filter_2k(int blockSize, int volumeGain, bool inicial, float
         haux2=false;
     }
 
+    //Ciclo para cálculo de h(n) asignando a las primeras 35 muestras el valor de las constantes y después de eso rellenando con ceros hasta 2048 que es el tamaño que se envia a la fft
     for(int i=0;i<2048;i++){
         switch (i) {
         case 0:
@@ -850,37 +883,40 @@ void controlVolume::filter_2k(int blockSize, int volumeGain, bool inicial, float
     fftw_free(h2);
     fftw_free(H2);
 
-    /*
+    */
     for(int i =0; i<blockSize; i++){
         out[i] = 0;
     }
-    */
+
 }
 
 
 /* ------------------------------ Filtro 1 kHz ------------------------------ */
 void controlVolume::filter_1k(int blockSize, int volumeGain, bool inicial, float *in, float *out){//filtro de 1kHz
 
-        int N = 2048;
+    /*    int tamano = 2048;
+
+        //Aquí se crean los punteros de tipo fft_complex para y,yk,x,xk, h y hk.
 
         fftw_complex *x;
-        x = (fftw_complex *)fftw_malloc(sizeof(fftw_complex) * N);
+        x = (fftw_complex *)fftw_malloc(sizeof(fftw_complex) *tamano);
 
         fftw_complex *X;
-        X = (fftw_complex *)fftw_malloc(sizeof(fftw_complex) * N);
+        X = (fftw_complex *)fftw_malloc(sizeof(fftw_complex) *tamano);
 
         fftw_complex *y;
-        y = (fftw_complex *)fftw_malloc(sizeof(fftw_complex) * N);
+        y = (fftw_complex *)fftw_malloc(sizeof(fftw_complex) *tamano);
 
         fftw_complex *Y;
-        Y = (fftw_complex *)fftw_malloc(sizeof(fftw_complex) * N);
+        Y = (fftw_complex *)fftw_malloc(sizeof(fftw_complex) *tamano);
 
         fftw_complex *h1;
-        h1 = (fftw_complex *)fftw_malloc(sizeof(fftw_complex) * N);
+        h1 = (fftw_complex *)fftw_malloc(sizeof(fftw_complex) *tamano);
 
         fftw_complex *H1;
-        H1 = (fftw_complex *)fftw_malloc(sizeof(fftw_complex) * N);
+        H1 = (fftw_complex *)fftw_malloc(sizeof(fftw_complex) *tamano);
 
+         //Se crean punteros auxiliares de entrada y salida con tamaño 1024 que es el tamaño de las muestras x(n)
         double *out_1 = new double[blockSize];
         double *in_1  = new double[blockSize];
 
@@ -889,6 +925,7 @@ void controlVolume::filter_1k(int blockSize, int volumeGain, bool inicial, float
             haux1=false;
         }
 
+        //Ciclo para cálculo de h(n) asignando a las primeras 50 muestras el valor de las constantes y después de eso rellenando con ceros hasta 2048 que es el tamaño que se envia a la fft
         for(int i=0;i<2048;i++){
             switch (i) {
             case 0:
@@ -1153,37 +1190,42 @@ void controlVolume::filter_1k(int blockSize, int volumeGain, bool inicial, float
         fftw_free(h1);
         fftw_free(H1);
 
-        /*
+        */
         for(int i =0; i<blockSize; i++){
             out[i] = 0;
         }
-        */
+
 }
 
 
 /* ------------------------------ Filtro 500 Hz ------------------------------ */
 void controlVolume::filter_500(int blockSize, int volumeGain, bool inicial, float *in, float *out){
 
-    int N = 2048;
+    /*
+    int tamano = 2048;
+
+
+    //Aquí se crean los punteros de tipo fft_complex para y,yk,x,xk, h y hk.
 
     fftw_complex *x;
-    x = (fftw_complex *)fftw_malloc(sizeof(fftw_complex) * N);
+    x = (fftw_complex *)fftw_malloc(sizeof(fftw_complex) *tamano);
 
     fftw_complex *X;
-    X = (fftw_complex *)fftw_malloc(sizeof(fftw_complex) * N);
+    X = (fftw_complex *)fftw_malloc(sizeof(fftw_complex) *tamano);
 
     fftw_complex *y;
-    y = (fftw_complex *)fftw_malloc(sizeof(fftw_complex) * N);
+    y = (fftw_complex *)fftw_malloc(sizeof(fftw_complex) *tamano);
 
     fftw_complex *Y;
-    Y = (fftw_complex *)fftw_malloc(sizeof(fftw_complex) * N);
+    Y = (fftw_complex *)fftw_malloc(sizeof(fftw_complex) *tamano);
 
     fftw_complex *h500;
-    h500 = (fftw_complex *)fftw_malloc(sizeof(fftw_complex) * N);
+    h500 = (fftw_complex *)fftw_malloc(sizeof(fftw_complex) *tamano);
 
     fftw_complex *H500;
-    H500 = (fftw_complex *)fftw_malloc(sizeof(fftw_complex) * N);
+    H500 = (fftw_complex *)fftw_malloc(sizeof(fftw_complex) *tamano);
 
+     //Se crean punteros auxiliares de entrada y salida con tamaño 1024 que es el tamaño de las muestras x(n)
     double *out_500 = new double[blockSize];
     double *in_500  = new double[blockSize];
 
@@ -1192,7 +1234,7 @@ void controlVolume::filter_500(int blockSize, int volumeGain, bool inicial, floa
         haux500=false;
     }
 
-
+//Ciclo para cálculo de h(n) asignando a las primeras 100 muestras el valor de las constantes y después de eso rellenando con ceros hasta 2048 que es el tamaño que se envia a la fft
     for(int i=0;i<2048;i++){
         switch (i) {
         case 0:
@@ -1658,37 +1700,41 @@ void controlVolume::filter_500(int blockSize, int volumeGain, bool inicial, floa
     fftw_free(h500);
     fftw_free(H500);
 
-    /*
+    */
     for(int i =0; i<blockSize; i++){
         out[i] = 0;
     }
-    */
+
 }
 
 
 /* ------------------------------ Filtro 250 Hz ------------------------------ */
 void controlVolume::filter_250(int blockSize, int volumeGain, bool inicial, float *in, float *out){//filtro de 250Hz
 
-    int N = 2048;
+  /*  int tamano = 2048;
+
+
+    //Aquí se crean los punteros de tipo fft_complex para y,yk,x,xk, h y hk.
 
     fftw_complex *x;
-    x = (fftw_complex *)fftw_malloc(sizeof(fftw_complex) * N);
+    x = (fftw_complex *)fftw_malloc(sizeof(fftw_complex) *tamano);
 
     fftw_complex *X;
-    X = (fftw_complex *)fftw_malloc(sizeof(fftw_complex) * N);
+    X = (fftw_complex *)fftw_malloc(sizeof(fftw_complex) *tamano);
 
     fftw_complex *y;
-    y = (fftw_complex *)fftw_malloc(sizeof(fftw_complex) * N);
+    y = (fftw_complex *)fftw_malloc(sizeof(fftw_complex) *tamano);
 
     fftw_complex *Y;
-    Y = (fftw_complex *)fftw_malloc(sizeof(fftw_complex) * N);
+    Y = (fftw_complex *)fftw_malloc(sizeof(fftw_complex) *tamano);
 
     fftw_complex *h250;
-    h250 = (fftw_complex *)fftw_malloc(sizeof(fftw_complex) * N);
+    h250 = (fftw_complex *)fftw_malloc(sizeof(fftw_complex) *tamano);
 
     fftw_complex *H250;
-    H250 = (fftw_complex *)fftw_malloc(sizeof(fftw_complex) * N);
+    H250 = (fftw_complex *)fftw_malloc(sizeof(fftw_complex) *tamano);
 
+     //Se crean punteros auxiliares de entrada y salida con tamaño 1024 que es el tamaño de las muestras x(n)
     double *out_250 = new double[blockSize];
     double *in_250  = new double[blockSize];
 
@@ -1697,6 +1743,7 @@ void controlVolume::filter_250(int blockSize, int volumeGain, bool inicial, floa
         haux250=false;
     }
 
+    //Ciclo para cálculo de h(n) asignando a las primeras 200 muestras el valor de las constantes y después de eso rellenando con ceros hasta 2048 que es el tamaño que se envia a la fft
     for(int i=0;i<2048;i++){
         switch (i) {
         case 0:
@@ -2643,37 +2690,42 @@ void controlVolume::filter_250(int blockSize, int volumeGain, bool inicial, floa
     fftw_free(Y);
     fftw_free(h250);
     fftw_free(H250);
-    /*
+    */
+
     for(int i =0; i<blockSize; i++){
         out[i] = 0;
     }
-    */
+
 }
 
 
 /* ------------------------------ Filtro 125 Hz ------------------------------ */
 void controlVolume::filter_125(int blockSize, int volumeGain, bool inicial, float *in, float *out){//filtro de 150Hz
 
-    int N = 2048;
+    /*
+    int tamano = 2048;
+
+    //Aquí se crean los punteros de tipo fft_complex para y,yk,x,xk, h y hk.
 
     fftw_complex *x;
-    x = (fftw_complex *)fftw_malloc(sizeof(fftw_complex) * N);
+    x = (fftw_complex *)fftw_malloc(sizeof(fftw_complex) *tamano);
 
     fftw_complex *X;
-    X = (fftw_complex *)fftw_malloc(sizeof(fftw_complex) * N);
+    X = (fftw_complex *)fftw_malloc(sizeof(fftw_complex) *tamano);
 
     fftw_complex *y;
-    y = (fftw_complex *)fftw_malloc(sizeof(fftw_complex) * N);
+    y = (fftw_complex *)fftw_malloc(sizeof(fftw_complex) *tamano);
 
     fftw_complex *Y;
-    Y = (fftw_complex *)fftw_malloc(sizeof(fftw_complex) * N);
+    Y = (fftw_complex *)fftw_malloc(sizeof(fftw_complex) *tamano);
 
     fftw_complex *h125;
-    h125 = (fftw_complex *)fftw_malloc(sizeof(fftw_complex) * N);
+    h125 = (fftw_complex *)fftw_malloc(sizeof(fftw_complex) *tamano);
 
     fftw_complex *H125;
-    H125 = (fftw_complex *)fftw_malloc(sizeof(fftw_complex) * N);
+    H125 = (fftw_complex *)fftw_malloc(sizeof(fftw_complex) *tamano);
 
+     //Se crean punteros auxiliares de entrada y salida con tamaño 1024 que es el tamaño de las muestras x(n)
     double *out_125 = new double[blockSize];
     double *in_125  = new double[blockSize];
 
@@ -2681,6 +2733,8 @@ void controlVolume::filter_125(int blockSize, int volumeGain, bool inicial, floa
         sol125[299] = {0};
         haux125=false;
     }
+
+    //Ciclo para cálculo de h(n) asignando a las primeras 300 muestras el valor de las constantes y después de eso rellenando con ceros hasta 2048 que es el tamaño que se envia a la fft
 
     for(int i=0;i<2048;i++){
         switch (i) {
@@ -3967,37 +4021,39 @@ void controlVolume::filter_125(int blockSize, int volumeGain, bool inicial, floa
     fftw_free(h125);
     fftw_free(H125);
 
-    /*
+    */
     for(int i =0; i<blockSize; i++){
         out[i] = 0;
     }
-    */
+
 }
 
 
 /* ------------------------------ Filtro 64 Hz ------------------------------ */
 void controlVolume::filter_63(int blockSize, int volumeGain, bool inicial, float *in, float *out){//filtro de 63Hz
 
-    int N = 2048;
+    int tamano = 2048;
+
+    //Aquí se crean los punteros de tipo fft_complex para y,yk,x,xk, h y hk.
 
     fftw_complex *x_n;
-    x_n = (fftw_complex *)fftw_malloc(sizeof(fftw_complex) * N);
+    x_n = (fftw_complex *)fftw_malloc(sizeof(fftw_complex) *tamano);
 
     fftw_complex *X;
-    X = (fftw_complex *)fftw_malloc(sizeof(fftw_complex) * N);
+    X = (fftw_complex *)fftw_malloc(sizeof(fftw_complex) *tamano);
 
     fftw_complex *y;
-    y = (fftw_complex *)fftw_malloc(sizeof(fftw_complex) * N);
+    y = (fftw_complex *)fftw_malloc(sizeof(fftw_complex) *tamano);
 
     fftw_complex *Y;
-    Y = (fftw_complex *)fftw_malloc(sizeof(fftw_complex) * N);
+    Y = (fftw_complex *)fftw_malloc(sizeof(fftw_complex) *tamano);
 
     fftw_complex *h64;
-    h64 = (fftw_complex *)fftw_malloc(sizeof(fftw_complex) * N);
+    h64 = (fftw_complex *)fftw_malloc(sizeof(fftw_complex) *tamano);
 
     fftw_complex *H64;
-    H64 = (fftw_complex *)fftw_malloc(sizeof(fftw_complex) * N);
-
+    H64 = (fftw_complex *)fftw_malloc(sizeof(fftw_complex) *tamano);
+ //Se crean punteros auxiliares de entrada y salida con tamaño 1024 que es el tamaño de las muestras x(n)
     double *out_64 = new double[blockSize];
     double *in_64  = new double[blockSize];
 
@@ -4006,7 +4062,7 @@ void controlVolume::filter_63(int blockSize, int volumeGain, bool inicial, float
         haux64=false;
     }
 
-
+//Ciclo para cálculo de h(n) asignando a las primeras 350 muestras el valor de las constantes y después de eso rellenando con ceros hasta 2048 que es el tamaño que se envia a la fft
     for(int i=0;i<2048;i++){
         switch (i) {
         case 0:
@@ -4710,6 +4766,7 @@ void controlVolume::filter_63(int blockSize, int volumeGain, bool inicial, float
             h64[i][IMAG] = 0;
             break;
 
+//Punto medio de simetría
         case 175:
             h64[i][REAL] = 0.006200362603890;
             h64[i][IMAG] = 0;
