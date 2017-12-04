@@ -1,3 +1,4 @@
+
 /*
  * DSP Example is part of the DSP Lecture at TEC-Costa Rica
  * Copyright (C) 2017  Jose Miguel Barboza
@@ -111,7 +112,7 @@ public:
 
 
    //----------------------------------------------parte para DFT
-   int FFT(int blockSize_, double *input);
+   int ENERGIA(int N, fftw_complex *yk);
 
    int valorbarra1_();
    int valorbarra2_();

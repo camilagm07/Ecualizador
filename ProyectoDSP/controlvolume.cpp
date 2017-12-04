@@ -125,7 +125,7 @@ controlVolume::~controlVolume(){
 /* ------------------------------ Filtro 16 kHz ------------------------------ */
 void controlVolume::filter_16k(int blockSize, int volumeGain, bool inicial, float *in, float *out){
 
-    /*
+
 
     int tamano = 2048;
 
@@ -223,7 +223,7 @@ void controlVolume::filter_16k(int blockSize, int volumeGain, bool inicial, floa
         out[n] = static_cast<float>(out_16[n]); // Conversión de double a float. Se obtiene la salida.
     }
 
-    // energia16000=FFT(blockSize,out_10);//se determina la energia de la banda
+    // energia16000=ENERGIA(2048,Y);//se determina la energia de la banda
 
     // Libera espacio memoria //
     delete out_16;
@@ -234,17 +234,17 @@ void controlVolume::filter_16k(int blockSize, int volumeGain, bool inicial, floa
     fftw_free(h16);
     fftw_free(H16);
 
-    */
+    /*
     for(int i =0; i<blockSize; i++){
         out[i] = 0;
-    }
+    }*/
 
 }
 
 
 /* ------------------------------ Filtro 8 kHz ------------------------------ */
 void controlVolume::filter_8k(int blockSize, int volumeGain, bool inicial, float *in, float *out){
-   /*
+
      int tamano = 2048;
 
      //Aquí se crean los punteros de tipo fft_complex para y,yk,x,xk, h y hk.
@@ -392,8 +392,10 @@ void controlVolume::filter_8k(int blockSize, int volumeGain, bool inicial, float
          out[n]=static_cast<float>(out_8[n]); // se hace conversion de double a float
      }
 
-     // energia8000=FFT(blockSize,out_8);//se determina la energia de la banda
+     // energia8000=ENERGIA(2048,Y);//se determina la energia de la banda
 
+
+     //Se libera el espacio en memoria asociado a los punteros
      delete out_8;
      delete in_8;
      fftw_free(x);
@@ -402,10 +404,10 @@ void controlVolume::filter_8k(int blockSize, int volumeGain, bool inicial, float
      fftw_free(h8);
      fftw_free(H8);
 
-     */
+     /*
      for(int i =0; i<blockSize; i++){
          out[i] = 0;
-     }
+     }*/
 
  }
 
@@ -413,7 +415,7 @@ void controlVolume::filter_8k(int blockSize, int volumeGain, bool inicial, float
 /* ------------------------------ Filtro 4 kHz ------------------------------ */
 void controlVolume::filter_4k(int blockSize, int volumeGain, bool inicial, float *in, float *out){//filtro de 2kHz
 
-    /*
+
     int tamano = 2048;
 
     //Aquí se crean los punteros de tipo fft_complex para y,yk,x,xk, h y hk.
@@ -548,7 +550,7 @@ void controlVolume::filter_4k(int blockSize, int volumeGain, bool inicial, float
                 h4[i][REAL] =  0.008325708765166;
                 h4[i][IMAG] =  0;
                 break;
-        case switch (i) 24:
+        case 24:
                 h4[i][REAL] =  0.038900469575622;
                 h4[i][IMAG] =  0;
                 break;
@@ -605,7 +607,9 @@ void controlVolume::filter_4k(int blockSize, int volumeGain, bool inicial, float
         }
     }
 
-    for(int i=0;i < 29;i++){  // rellena con la entrada actual
+
+
+    for(int i=0;i < 29;i++){  // CALCULO SOLAPAMIENTO. Rellena con la entrada actual
         sol4[i] = in_4[(1024-29) + i];
     }
 
@@ -624,9 +628,9 @@ void controlVolume::filter_4k(int blockSize, int volumeGain, bool inicial, float
         out[n]=static_cast<float>(out_4[n]);// se hace conversion de double a float
     }
 
-    //energia4000=FFT(blockSize,out_4);//se determina la energia de la banda
+    //energia4000=ENERGIA(2048,Y);//se determina la energia de la banda
 
-    delete o switch (i)ut_4;
+    delete out_4;
     delete in_4;
     fftw_free(x);
     fftw_free(X);
@@ -634,10 +638,10 @@ void controlVolume::filter_4k(int blockSize, int volumeGain, bool inicial, float
     fftw_free(h4);
     fftw_free(H4);
 
-    */
+    /*
     for(int i =0; i<blockSize; i++){
         out[i] = 0;
-    }
+    }*/
 
 }
 
@@ -645,7 +649,7 @@ void controlVolume::filter_4k(int blockSize, int volumeGain, bool inicial, float
 /* ------------------------------ Filtro 2 kHz ------------------------------ */
 void controlVolume::filter_2k(int blockSize, int volumeGain, bool inicial, float *in, float *out){//filtro de 2kHz
 
-    /* int tamano = 2048;
+     int tamano = 2048;
 
     //Aquí se crean los punteros de tipo fft_complex para y,yk,x,xk, h y hk.
 
@@ -854,7 +858,7 @@ void controlVolume::filter_2k(int blockSize, int volumeGain, bool inicial, float
         }
     }
 
-    for(int i=0;i < 34;i++){  // rellena con la entrada actual
+    for(int i=0;i < 34;i++){  // CALCULO SOLAPAMIENTO. Rellena con la entrada actual
         sol2[i] = in_2[(1024-34) + i];
     }
 
@@ -873,8 +877,9 @@ void controlVolume::filter_2k(int blockSize, int volumeGain, bool inicial, float
         out[n]=static_cast<float>(out_2[n]);// se hace conversion de double a float
     }
 
-    // energia2000=FFT(blockSize,out_2);//se determina la energia de la banda
+    energia2000=ENERGIA(2048,Y);//se determina la energia de la banda
 
+    //Se libera el espacio en memoria asociado a los punteros
     delete out_2;
     delete in_2;
     fftw_free(x);
@@ -883,10 +888,10 @@ void controlVolume::filter_2k(int blockSize, int volumeGain, bool inicial, float
     fftw_free(h2);
     fftw_free(H2);
 
-    */
+    /*
     for(int i =0; i<blockSize; i++){
         out[i] = 0;
-    }
+    }*/
 
 }
 
@@ -894,7 +899,7 @@ void controlVolume::filter_2k(int blockSize, int volumeGain, bool inicial, float
 /* ------------------------------ Filtro 1 kHz ------------------------------ */
 void controlVolume::filter_1k(int blockSize, int volumeGain, bool inicial, float *in, float *out){//filtro de 1kHz
 
-    /*    int tamano = 2048;
+    int tamano = 2048;
 
         //Aquí se crean los punteros de tipo fft_complex para y,yk,x,xk, h y hk.
 
@@ -1161,7 +1166,7 @@ void controlVolume::filter_1k(int blockSize, int volumeGain, bool inicial, float
             }
         }
 
-        for(int i=0;i < 49;i++){  // rellena con la entrada actual
+        for(int i=0;i < 49;i++){  // CALCULO SOLAPAMIENTO. Rellena con la entrada actual
             sol1[i] = in_1[(1024-49) + i];
         }
 
@@ -1180,8 +1185,9 @@ void controlVolume::filter_1k(int blockSize, int volumeGain, bool inicial, float
             out[n]=static_cast<float>(out_1[n]);// se hace conversion de double a float
         }
 
-        // energia1000=FFT(blockSize,out_1);//se determina la energia de la banda
+         energia1000=ENERGIA(2048,Y);//se determina la energia de la banda
 
+        //Se libera el espacio en memoria asociado a los punteros
         delete out_1;
         delete in_1;
         fftw_free(x);
@@ -1190,10 +1196,10 @@ void controlVolume::filter_1k(int blockSize, int volumeGain, bool inicial, float
         fftw_free(h1);
         fftw_free(H1);
 
-        */
+        /*
         for(int i =0; i<blockSize; i++){
             out[i] = 0;
-        }
+        }*/
 
 }
 
@@ -1201,7 +1207,7 @@ void controlVolume::filter_1k(int blockSize, int volumeGain, bool inicial, float
 /* ------------------------------ Filtro 500 Hz ------------------------------ */
 void controlVolume::filter_500(int blockSize, int volumeGain, bool inicial, float *in, float *out){
 
-    /*
+
     int tamano = 2048;
 
 
@@ -1671,7 +1677,7 @@ void controlVolume::filter_500(int blockSize, int volumeGain, bool inicial, floa
         }
     }
 
-    for(int i=0;i < 99;i++){  // rellena con la entrada actual
+    for(int i=0;i < 99;i++){  // CALCULO SOLAPAMIENTO. Rellena con la entrada actual
         sol500[i] = in_500[(1024-99) + i];
     }
 
@@ -1690,8 +1696,9 @@ void controlVolume::filter_500(int blockSize, int volumeGain, bool inicial, floa
         out[n]=static_cast<float>(out_500[n]);// se hace conversion de double a float
     }
 
-    //energia500=FFT(blockSize,out_6);
+    //energia500=ENERGIA(2048,Y);
 
+    //Se libera el espacio en memoria asociado a los punteros
     delete out_500;
     delete in_500;
     fftw_free(x);
@@ -1700,18 +1707,17 @@ void controlVolume::filter_500(int blockSize, int volumeGain, bool inicial, floa
     fftw_free(h500);
     fftw_free(H500);
 
-    */
+    /*
     for(int i =0; i<blockSize; i++){
         out[i] = 0;
-    }
-
+    }*/
 }
 
 
 /* ------------------------------ Filtro 250 Hz ------------------------------ */
 void controlVolume::filter_250(int blockSize, int volumeGain, bool inicial, float *in, float *out){//filtro de 250Hz
 
-  /*  int tamano = 2048;
+    int tamano = 2048;
 
 
     //Aquí se crean los punteros de tipo fft_complex para y,yk,x,xk, h y hk.
@@ -2662,7 +2668,7 @@ void controlVolume::filter_250(int blockSize, int volumeGain, bool inicial, floa
         }
     }
 
-    for(int i=0;i < 219;i++){  // rellena con la entrada actual
+    for(int i=0;i < 219;i++){  // CALCULO SOLAPAMIENTO. Rellena con la entrada actual
         sol250[i] = in_250[(1024 - 219) + i];
     }
 
@@ -2681,8 +2687,9 @@ void controlVolume::filter_250(int blockSize, int volumeGain, bool inicial, floa
         out[n]=static_cast<float>(out_250[n]);// se hace conversion de double a float
     }
 
-    //energia250=FFT(blockSize,out_250);//se determina la energia de la banda
+    //energia250=ENERGIA(2048,Y);//se determina la energia de la banda
 
+    //Se libera el espacio en memoria asociado a los punteros
     delete out_250;
     delete in_250;
     fftw_free(x);
@@ -2690,11 +2697,12 @@ void controlVolume::filter_250(int blockSize, int volumeGain, bool inicial, floa
     fftw_free(Y);
     fftw_free(h250);
     fftw_free(H250);
-    */
+
+    /*
 
     for(int i =0; i<blockSize; i++){
         out[i] = 0;
-    }
+    }*/
 
 }
 
@@ -2702,7 +2710,7 @@ void controlVolume::filter_250(int blockSize, int volumeGain, bool inicial, floa
 /* ------------------------------ Filtro 125 Hz ------------------------------ */
 void controlVolume::filter_125(int blockSize, int volumeGain, bool inicial, float *in, float *out){//filtro de 150Hz
 
-    /*
+
     int tamano = 2048;
 
     //Aquí se crean los punteros de tipo fft_complex para y,yk,x,xk, h y hk.
@@ -3992,7 +4000,7 @@ void controlVolume::filter_125(int blockSize, int volumeGain, bool inicial, floa
         }
     }
 
-    for(int i=0;i < 299;i++){  // rellena con la entrada actual
+    for(int i=0;i < 299;i++){  // CALCULO SOLAPAMIENTO. Rellena con la entrada actual
         sol125[i] = in_125[(1024 - 299) + i];
     }
 
@@ -4011,8 +4019,9 @@ void controlVolume::filter_125(int blockSize, int volumeGain, bool inicial, floa
         out[n]=static_cast<float>(out_125[n]);// se hace conversion de double a float
     }
 
-    //energia250=FFT(blockSize,out_250);//se determina la energia de la banda
+    //energia250=ENERGIA(2048,Y);//se determina la energia de la banda
 
+    //Se libera el espacio en memoria asociado a los punteros
     delete out_125;
     delete in_125;
     fftw_free(x);
@@ -4021,10 +4030,10 @@ void controlVolume::filter_125(int blockSize, int volumeGain, bool inicial, floa
     fftw_free(h125);
     fftw_free(H125);
 
-    */
+    /*
     for(int i =0; i<blockSize; i++){
         out[i] = 0;
-    }
+    }*/
 
 }
 
@@ -5503,7 +5512,7 @@ void controlVolume::filter_63(int blockSize, int volumeGain, bool inicial, float
         }
     }
 
-    for(int i=0;i < 349;i++){  // rellena con la entrada actual
+    for(int i=0;i < 349;i++){  // CALCULO SOLAPAMIENTO. Rellena con la entrada actual
         sol64[i] = in_64[(1024 - 349) + i];
     }
 
@@ -5522,8 +5531,9 @@ void controlVolume::filter_63(int blockSize, int volumeGain, bool inicial, float
         out[n]=static_cast<float>(out_64[n]);// se hace conversion de double a float
     }
 
-//   energia64=FFT(blockSize,out_64);//se determina la energia de la banda
+   energia64=ENERGIA(2048,Y);//se determina la energia de la banda
 
+    //Se libera el espacio en memoria asociado a los punteros
     delete out_64;
     delete in_64;
     fftw_free(x_n);
@@ -5606,7 +5616,7 @@ void controlVolume::filter_31_5(int blockSize, int volumeGain, bool inicial, flo
             }
        }
 
-      energia31=FFT(blockSize,out_0);
+      energia31=(energia125-energia64)*0.02*volumeGain;
       ea=tmpout_i[1022];//w1(-2)//m
       eb=tmpout_i[1023];//w1(-1)//o
       ec=tmpout_j[1022];//w2(-2)//p
@@ -5711,31 +5721,30 @@ void controlVolume::eq(int blockSize, int volumeGain, int g1, int g2, int g3, in
  * Se retorna el valor de la energia
  */
 
-int controlVolume::FFT(int blockSize_,double *input){
+int controlVolume::ENERGIA(int N, fftw_complex *yk){
 
-    int N;     // se define el tamano de la DFT
-    N=blockSize_;
+    /*int N;     // se define el tamano de la DFT
+    N=blockSize_;*/
     double outtotal=0;  // variable para calcular la energia
 
-
-
+/*
     fftw_complex *out;
     out = (fftw_complex *)fftw_malloc(sizeof(fftw_complex) * N);
     fftw_plan my_plan; // se crea variable para almacenar el metodo a ejecutar de la biblbioteca
-    my_plan =fftw_plan_dft_r2c_1d(N, input, out,FFTW_ESTIMATE); // se dan a tributos al metodo a utilizar
+    my_plan =fftw_plan_dft_r2c_1d(N, yk); // se dan a tributos al metodo a utilizar
     fftw_execute(my_plan); // se ejecuta la FFT, se ejecuta el metodo
-
+*/
 
     for(int i=0;i<(N/2)+1;i++) // Se recorre el arreglo y se calcula la energia
     {
-        outtotal=outtotal+((pow(out[i][0],2)+pow(out[i][1],2))/N);    // Relacion  de Parseval para obtener la energia de cada banda.
+        outtotal=outtotal+((pow(yk[i][REAL],2)+pow(yk[i][IMAG],2))/N);    // Relacion  de Parseval para obtener la energia de cada banda.
     }
 
-    outtotal=10*(2*outtotal-((pow(out[N/2][0],2)+pow(out[N/2][1],2))/N)); // se da una ganancia a la energia para que se visualice correctamente en las barras
+    outtotal=10*(2*outtotal-((pow(yk[N/2][REAL],2)+pow(yk[N/2][IMAG],2))/N)); // se da una ganancia a la energia para que se visualice correctamente en las barras
 
-    fftw_destroy_plan(my_plan); // se elimina el m[etodo utilizado
+    /*fftw_destroy_plan(my_plan); // se elimina el m[etodo utilizado
     fftw_free(out); // se libera puntero de salida de tipo complejo
-
+*/
 
 
 
